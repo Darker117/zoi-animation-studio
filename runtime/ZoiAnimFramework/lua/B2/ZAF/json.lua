@@ -1,4 +1,4 @@
--- Minimal JSON encode/decode for the Zoi Animation Framework (sandbox-safe, no loadstring).
+-- Minimal JSON encode/decode for the Zoi Animation Studio mod (sandbox-safe, no loadstring).
 local M = {}
 
 local escapes = { ['"'] = '\\"', ['\\'] = '\\\\', ['\b'] = '\\b', ['\f'] = '\\f', ['\n'] = '\\n', ['\r'] = '\\r', ['\t'] = '\\t' }

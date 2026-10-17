@@ -295,7 +295,7 @@ export function exportDialog(app) {
     title: 'Export', wide: true, content: body,
     footLeft: h('div', { style: { display: 'flex', gap: '6px' } },
       h('button.btn.ghost', { onclick: () => inzoiGuide(app), html: icon('help', 15) + 'How do I get this into inZOI?' }),
-      bridge.available ? h('button.btn', { title: 'Adds this pack to the Animations panel of the Zoi Animation Framework mod in your game', onclick: () => installToGame(app, opts) , html: icon('gamepad', 15) + 'Install into my game' }) : null),
+      bridge.available ? h('button.btn', { title: 'Adds this pack to the Animations panel of the Zoi Animation Studio mod in your game', onclick: () => installToGame(app, opts) , html: icon('gamepad', 15) + 'Install into my game' }) : null),
     buttons: [{ label: 'Cancel' }, { label: 'Export', primary: true, onClick: async () => {
       for (const k of Object.keys(opts)) prefSet('exp.' + k, opts[k]);
       await runExport(app, opts);

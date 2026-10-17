@@ -60,7 +60,7 @@ Rebuilding a pack updates the same project and mod folder: `<pack>\modkit_build.
 ### 1. Check the pack (`zaf_modkit.py plan`)
 
 * `zaf_pack.json` must be version 1 and exported with `skeleton: "character"` (see [Skeleton](#skeleton-bone-for-bone-or-nothing)).
-* One Character Animation row is planned per animation used by an `interaction` or `pose` scene. Each row's id is the manifest's `anim_id`, which is what the Zoi Animation Framework panel plays. Ids must be letters, digits and `_`; the studio's `slug()` already guarantees this.
+* One Character Animation row is planned per animation used by an `interaction` or `pose` scene. Each row's id is the manifest's `anim_id`, which is what the Zoi Animation Studio panel plays. Ids must be letters, digits and `_`; the studio's `slug()` already guarantees this.
 * Anim Info List entries come from the actor slot. Gender `Any` gives one `Female` and one `Male` entry; growth `Adult` and `Teen` use `AnimGrowthStep` `Adult`; `Child` uses gender `Default` with `AnimGrowthStep` `Youth`. This mirrors inZOI's own rows: the `Self_Angry` row has Female/Adult, Male/Adult and Default/Youth entries.
 * A stage marked `loop` gets loop markers on its montage (see step 2).
 
@@ -186,7 +186,7 @@ These are the exact remaining steps, in the order they block a true one-click fl
 
 1. **Test in inZOI** (needs the player). Build a real pack, restart inZOI, then check:
    * the mod appears in the mod list;
-   * the Zoi Animation Framework panel plays each `anim_id`;
+   * the Zoi Animation Studio panel plays each `anim_id`;
    * looping stages loop, through the framework's `PlayLoopAnim` hidden interaction;
    * female, male and child Zois get their entries, and teens use the Adult entries.
    If `PlayLoopAnim` turns out to need a real `Loop` montage section, see item 5.

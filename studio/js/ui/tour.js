@@ -7,7 +7,7 @@ const STEPS = [
   { sel: '#timelineWrap', title: '3 · Animate on the timeline', text: 'With Auto-key on (the default), move the teal playhead, change the pose, and a key is saved. Drag keys to retime them, right-click for easing, Space to play.' },
   { sel: '#inspector', title: '4 · Fine-tune', text: 'Friendly sliders for the selected part ("Raise arm", "Bend knee"), timing and loop settings, inZOI settings, and the Zois in the scene.' },
   { sel: '#topbar .live-pill', title: '5 · See it on your Zoi', text: 'Stream straight into inZOI through the game\'s Motion Capture: your Zoi copies the studio in real time.' },
-  { sel: '#topbar .btn.primary', title: '6 · Export a pack', text: 'One click builds an inZOI pack: FBX files, a pack manifest for the Zoi Animation Framework and a ModKit setup sheet.' },
+  { sel: '#topbar .btn.primary', title: '6 · Export a pack', text: 'One click builds an inZOI pack: FBX files, a pack manifest for the in-game Zoi Animation Studio mod and a ModKit setup sheet.' },
 ];
 
 export function startTour() {

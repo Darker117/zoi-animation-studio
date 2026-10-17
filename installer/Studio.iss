@@ -23,7 +23,7 @@ AppId={{6F3C1D0B-2E7A-4C4B-9C61-2D7A5E0B9A31}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
-AppPublisher=Zoi Animation Framework
+AppPublisher=Zoi Animation Studio
 VersionInfoVersion={#AppVersion}
 VersionInfoDescription={#AppName} Setup
 ; Per-user install: no administrator prompt, lands in %LOCALAPPDATA%\Programs.
@@ -71,7 +71,7 @@ ClickFinish=
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Shortcuts:"
-Name: "gamemod"; Description: "Install the Zoi Animation Framework mod into inZOI (experimental: not yet tested in the game)"; GroupDescription: "inZOI:"; Flags: unchecked; Check: InzoiFound
+Name: "gamemod"; Description: "Install the Zoi Animation Studio mod into inZOI (experimental: not yet tested in the game)"; GroupDescription: "inZOI:"; Flags: unchecked; Check: InzoiFound
 Name: "aimodel"; Description: "Download the AI for Describe a motion (about 4 GB download and 6.5 GB on disk with an NVIDIA graphics card, about 1 GB without; needs the internet once)"; GroupDescription: "AI:"
 
 [Files]

@@ -4,7 +4,7 @@ This guide takes an animation you made in Studio and puts it on your Zois in the
 
 * the instant **live link**;
 * the permanent **inZOI ModKit** mod, step by step;
-* the in-game **Animations panel** of the Zoi Animation Framework mod;
+* the in-game **Animations panel** of the Zoi Animation Studio mod;
 * scenes with several Zois;
 * a reference for modders who ship packs.
 
@@ -13,7 +13,7 @@ For how to make animations in the first place, see the **[Studio user guide](USE
 > **What has been tested.**
 > * The live link uses inZOI's own Motion Capture feature. Studio's side is checked; streaming into the running game has not been tried yet.
 > * The ModKit steps follow the official ModKit documentation and a build tested against inZOI ModKit `20261011.16078` ([MODKIT_PIPELINE.md](MODKIT_PIPELINE.md)).
-> * The **Zoi Animation Framework mod (the in-game Animations panel) has not been tested inside the game yet.**
+> * The **Zoi Animation Studio mod (the in-game Animations panel) has not been tested inside the game yet.**
 >
 > [Section 12](#12-what-has-been-tested) lists exactly what has and has not been checked.
 
@@ -40,7 +40,7 @@ For how to make animations in the first place, see the **[Studio user guide](USE
 |---|---|---|---|
 | **Live link** | Your Zoi copies whatever Studio shows, in real time | About a minute | Only while Studio streams |
 | **ModKit mod** | A real inZOI mod that contains your animations | 20 to 60 minutes the first time, less after that | Permanent; shareable on CurseForge |
-| **Zoi Animation Framework panel** | An in-game menu that plays any animation, including your packs, on any Zoi, and runs multi-Zoi scenes | Install once | Permanent (it plays the animations your ModKit mod adds) |
+| **Zoi Animation Studio panel** | An in-game menu that plays any animation, including your packs, on any Zoi, and runs multi-Zoi scenes | Install once | Permanent (it plays the animations your ModKit mod adds) |
 
 The game can only play an animation permanently when that animation is inside a mod built with the **inZOI ModKit**. Studio cannot skip that step. What it does is make it as short as possible:
 
@@ -59,7 +59,7 @@ The live link needs no mod at all, because it drives your Zoi through the game's
      │                                                                   │
      │ Export → Install into my game                                     │ installed in Documents\inZOI\Mods
      ▼                                                                   ▼
-   zaf_pack.json ──▶  Zoi Animation Framework mod: Animations panel ──▶ plays the entries on any Zoi, lines up scenes
+   zaf_pack.json ──▶  Zoi Animation Studio mod: Animations panel ──▶ plays the entries on any Zoi, lines up scenes
 ```
 
 ---
@@ -338,7 +338,7 @@ Each stage of each Zoi is a separate entry, and the in-game panel plays them in 
 
 ## 6. The in-game Animations panel
 
-The **Zoi Animation Framework** mod adds an **Animations** panel to the game:
+The **Zoi Animation Studio** mod adds an **Animations** panel to the game:
 * play any animation the game knows, or your packs' animations, on any Zoi;
 * keep favourites;
 * run multi-Zoi scenes.
@@ -350,10 +350,10 @@ It is the in-game half of this project.
 ### 6.1 Install the framework mod
 
 Either way works:
-* **During Studio's Setup:** tick *Install the Zoi Animation Framework mod into inZOI*. This option only appears when inZOI is found.
+* **During Studio's Setup:** tick *Install the Zoi Animation Studio mod into inZOI*. This option only appears when inZOI is found.
 * **From Studio:** **Export → Install into my game** installs the mod the first time you use it.
 
-The mod goes to `Documents\inZOI\Mods\InGame\ZoiAnimFramework`.
+The mod goes to `Documents\inZOI\Mods\InGame\ZoiAnimFramework`. The folder, the `zaf` prefixes and `zaf_pack.json` keep the project's first name (Zoi Animation Framework), so existing installs and packs keep working.
 * In the game, check that it is **Validated** and **Enabled** on the **Mod** screen, like any other mod.
 * After updating Studio, run Setup again with the mod box ticked to update the framework. *Install into my game* only installs it when it is missing.
 
@@ -454,7 +454,7 @@ To share a pack on CurseForge, players need two things:
 Ship a Lua module named exactly **`ZAF_Packs`** at `lua/B2/ZAF_Packs.lua` in your mod. It returns a table with a `register` function. The framework calls it with an `api` object and you add your pack manifest as a Lua table. It is the same data as `zaf_pack.json`:
 
 ```lua
--- lua/B2/ZAF_Packs.lua : registers this mod's animations with the Zoi Animation Framework.
+-- lua/B2/ZAF_Packs.lua : registers this mod's animations with the Zoi Animation Studio mod.
 return {
   register = function(api)
     api.add({
@@ -596,7 +596,7 @@ It is not part of the installed app yet, and the mods it builds have not been te
 - [ ] Packaged locally to `Documents\inZOI\Mods`
 
 **In the game**
-- [ ] Your mod and the Zoi Animation Framework are Validated and Enabled on the Mod screen
+- [ ] Your mod and the Zoi Animation Studio mod are Validated and Enabled on the Mod screen
 - [ ] The pack is added with Export → Install into my game (Whole pack)
 - [ ] The game was restarted after installing or rebuilding
 
@@ -617,7 +617,7 @@ It is not part of the installed app yet, and the mods it builds have not been te
 * Check that the entry's Anim Info List covers the Zoi you clicked: its gender, and Adult (teens) or Youth (children).
 
 **The panel says "Waiting for the framework director (is the mod enabled?)"**
-* The framework's Lua part is not running. Check that the Zoi Animation Framework mod is Enabled, then restart the game.
+* The framework's Lua part is not running. Check that the Zoi Animation Studio mod is Enabled, then restart the game.
 
 **My pack is not in the panel**
 * Use **Install into my game** with **Whole pack**, then restart the game.

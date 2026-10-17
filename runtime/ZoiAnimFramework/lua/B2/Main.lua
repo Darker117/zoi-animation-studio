@@ -1,4 +1,4 @@
--- Zoi Animation Framework (ZAF) — B2 (simulation) director.
+-- Zoi Animation Studio mod (ZAF, from the project's first name, Zoi Animation Framework) — B2 (simulation) director.
 --
 -- The in-game panel (ui/zaf) drives most things with CLI commands directly. This script does
 -- what the UI cannot: turning Zois to an exact facing while placing them (scene alignment),
@@ -213,7 +213,7 @@ function M.on_begin()
     find_me()
     local box = read_box()
     S.seq = box and box.seq or nil -- ignore whatever was left from a previous session
-    log("Zoi Animation Framework " .. VERSION .. " ready")
+    log("Zoi Animation Studio " .. VERSION .. " ready")
 end
 
 -- The docs say Main.lua callbacks get no `self`, while working mods declare (self, dt):

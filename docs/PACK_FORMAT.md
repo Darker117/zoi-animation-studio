@@ -1,6 +1,6 @@
-# Zoi Animation Framework — file formats
+# Zoi Animation Studio — file formats
 
-Two formats make up the framework:
+Two formats make up the framework. The `zaf` / `ZAF` names come from the project's first name, Zoi Animation Framework, and are kept so existing packs keep working:
 
 | File | Who writes it | Who reads it | Purpose |
 |---|---|---|---|

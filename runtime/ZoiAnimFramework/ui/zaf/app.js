@@ -1,5 +1,5 @@
 /**
- * Zoi Animation Framework — in-game panel.
+ * Zoi Animation Studio mod — in-game panel.
  * Window management is handled by window.js (the `wf` global).
  *
  *  Animations tab : every animation the game knows (its CharacterAnim table) + animations from packs.
@@ -189,7 +189,7 @@
 
     function actionRow(id, animId, loop) {
         return {
-            Id: id, Comment: 'Zoi Animation Framework: play ' + animId, ActionTags: [],
+            Id: id, Comment: 'Zoi Animation Studio: play ' + animId, ActionTags: [],
             Actions: [{
                 ConditionId: 'None', bCancelWhenMotiveInsufficient: false, Duration: 0, IsForceCancelable: true,
                 IsWaitFinishAction: true, FinishPrev: false, bEnableInsertAutoMove: false, BaseObject: 'Self',
@@ -202,7 +202,7 @@
 
     function interactionRow(id, actionId) {
         return {
-            Id: id, Comment: 'Zoi Animation Framework', InteractionTags: [], ConditionId: 'None', GrabEntityConditionId: 'None',
+            Id: id, Comment: 'Zoi Animation Studio', InteractionTags: [], ConditionId: 'None', GrabEntityConditionId: 'None',
             InteractionSlotUsage: 'None', EnableSlotTags: ['None'], ObjectSlotUsage: 'None', ActionIdList: [actionId],
             TargetFilterInfoList: [], bAutoFindRepeat: false, AutoFindRepeatMaxCount: 0, AutoFindRepeatSearchRange: 500,
             TargetFilterFindAll: false, SpaceTargetFilterId: 'None', NoneTargetPlayable: true, CheckSlotToEntity: false,
@@ -214,7 +214,7 @@
 
     function bagRow(id, interactionId, label) {
         return {
-            Id: id, Comment: 'Zoi Animation Framework: ' + label,
+            Id: id, Comment: 'Zoi Animation Studio: ' + label,
             InteractionRewards: [{ StatId: 'None', Reward: 0, Tier: 'Invalid' }], PreferenceRewards: [], InteractionBagTags: [],
             AddOnAnimId: 'Default', TPOTags: [], AutonomyGroupTag: 'None', GroupID: 'Group_Hide', PostureGroupId: 'StandGroup',
             InteractionBagCategory: 'None', StrongEmotionFilters: [], EnqueueConditionIds: [], InteractionVisibleConditionIds: [],

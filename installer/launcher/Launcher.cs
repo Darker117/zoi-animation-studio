@@ -24,7 +24,7 @@ using Microsoft.Web.WebView2.WinForms;
 [assembly: System.Reflection.AssemblyTitle("Studio")]
 [assembly: System.Reflection.AssemblyProduct("Studio")]
 [assembly: System.Reflection.AssemblyDescription("Animation studio for inZOI")]
-[assembly: System.Reflection.AssemblyCompany("Zoi Animation Framework")]
+[assembly: System.Reflection.AssemblyCompany("Zoi Animation Studio")]
 [assembly: System.Reflection.AssemblyVersion("1.1.1.0")]
 [assembly: System.Reflection.AssemblyFileVersion("1.1.1.0")]
 

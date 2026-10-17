@@ -151,10 +151,10 @@ export function writeAnimationFBX(data, { fps = 30, name = 'Take 001', positionS
       N('MetaData', [], [N('Version', [I(100)]), N('Title', [S(name)]), N('Subject', [S('')]), N('Author', [S('')]), N('Keywords', [S('')]), N('Revision', [S('')]), N('Comment', [S('Made with Studio')])]),
       N('Properties70', [], [
         P.string('DocumentUrl', '/anim.fbx'), P.string('SrcDocumentUrl', '/anim.fbx'), P.compound('Original'),
-        P.string('Original|ApplicationVendor', 'Zoi Animation Framework'), P.string('Original|ApplicationName', 'Studio'),
+        P.string('Original|ApplicationVendor', 'Zoi Animation Studio'), P.string('Original|ApplicationName', 'Studio'),
         P.string('Original|ApplicationVersion', '1.0'), P.datetime('Original|DateTime_GMT', '01/01/1970 00:00:00.000'),
         P.string('Original|FileName', '/anim.fbx'), P.compound('LastSaved'),
-        P.string('LastSaved|ApplicationVendor', 'Zoi Animation Framework'), P.string('LastSaved|ApplicationName', 'Studio'),
+        P.string('LastSaved|ApplicationVendor', 'Zoi Animation Studio'), P.string('LastSaved|ApplicationName', 'Studio'),
         P.string('LastSaved|ApplicationVersion', '1.0'), P.datetime('LastSaved|DateTime_GMT', '01/01/1970 00:00:00.000'),
       ]),
     ]),

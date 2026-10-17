@@ -4,7 +4,7 @@
 
 bl_info = {
     "name": "Zoi Motion Bridge",
-    "author": "Zoi Animation Framework",
+    "author": "Zoi Animation Studio",
     "version": (1, 0, 0),
     "blender": (4, 2, 0),
     "location": "View3D > Sidebar (N) > Zoi Motion",

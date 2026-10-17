@@ -1,8 +1,8 @@
 {
 	"ProjectName": "ZoiAnimFramework",
-	"FriendlyName": "Zoi Animation Framework",
+	"FriendlyName": "Zoi Animation Studio",
 	"Description": "Play animations, poses and multi-Zoi scenes on any Zoi. Animation packs made with Studio show up in the in-game Animations panel.",
-	"Author": "Zoi Animation Framework",
+	"Author": "Zoi Animation Studio",
 	"Version": "1.0.0",
 	"Url": "",
 	"Dependencies": [],

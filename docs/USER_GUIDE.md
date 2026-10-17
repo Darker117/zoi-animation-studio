@@ -68,7 +68,7 @@ This guide explains every part of Studio. The step-by-step path from a finished 
    | Option | Default | What it does |
    |---|---|---|
    | **Create a desktop shortcut** | off | Adds a Studio icon to the desktop. The Start menu entry is always created. |
-   | **Install the Zoi Animation Framework mod into inZOI** | off | Only shown when inZOI is found. Copies the in-game Animations panel mod into `Documents\inZOI\Mods\InGame\ZoiAnimFramework`. It is experimental and has not been tested inside the game yet; see [Getting your animations into inZOI](ANIMATIONS_IN_INZOI.md#6-the-in-game-animations-panel). |
+   | **Install the Zoi Animation Studio mod into inZOI** | off | Only shown when inZOI is found. Copies the in-game Animations panel mod into `Documents\inZOI\Mods\InGame\ZoiAnimFramework`. It is experimental and has not been tested inside the game yet; see [Getting your animations into inZOI](ANIMATIONS_IN_INZOI.md#6-the-in-game-animations-panel). |
    | **Download the AI for Describe a motion** | on | Downloads and sets up the AI once, at the end of the install. About 4 GB to download (6.5 GB on disk) with an NVIDIA card, about 1 GB without one. |
 
 6. **Ready to Install:** click **Install**.
