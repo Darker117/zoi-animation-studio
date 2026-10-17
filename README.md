@@ -1,4 +1,4 @@
-# Zoi Animation Framework
+# Zoi Animation Studio
 
 Make any animation for inZOI's Zois — no 3D experience needed.
 
