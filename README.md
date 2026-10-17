@@ -5,7 +5,7 @@ Make any animation for inZOI's Zois — no 3D experience needed.
 The framework has two halves:
 
 * **Studio**: make animations on your PC.
-* **Zoi Animation Framework mod**: an in-game Animations panel that plays them on any Zoi, including multi-Zoi scenes.
+* **Zoi Animation Framework Studio**: an in-game Animations panel that plays them on any Zoi, including multi-Zoi scenes.
 
 **Studio** is a Windows animation editor. You pose your Zoi like a doll, set keys on a timeline, act motions out on a webcam, describe them in words, or bring in Mixamo, mocap and VRM animations. Then you can:
 
