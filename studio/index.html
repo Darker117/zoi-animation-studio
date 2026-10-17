@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#111215" />
+  <meta name="color-scheme" content="dark" />
+  <title>Studio</title>
+  <link rel="icon" id="favicon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="css/studio.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.js",
+        "three/addons/": "./vendor/three/addons/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app" class="app">
+    <header class="topbar" id="topbar"></header>
+    <aside class="panel left" id="library"></aside>
+    <main class="viewport-wrap" id="viewportWrap">
+      <canvas id="viewport" tabindex="0" aria-label="3D viewport"></canvas>
+      <div class="vp-overlay vp-top-left" id="actorChips"></div>
+      <div class="vp-overlay vp-top-right" id="viewTools"></div>
+      <div class="vp-overlay vp-bottom-left" id="hint"></div>
+      <div class="vp-overlay vp-bottom-right" id="vpStatus"></div>
+      <div class="drop-overlay" id="dropOverlay"><div><div class="drop-icon"></div><b>Drop to import</b><span>FBX · GLB · VRM · VRMA · BVH · .zmotion</span></div></div>
+    </main>
+    <aside class="panel right" id="inspector"></aside>
+    <section class="timeline-wrap" id="timelineWrap">
+      <div class="resize-handle" id="timelineResize" title="Drag to resize"></div>
+      <div class="transport" id="transport"></div>
+      <div class="timeline" id="timelineHost"><canvas id="timeline"></canvas></div>
+    </section>
+  </div>
+  <div id="modalRoot"></div>
+  <div id="toastRoot" class="toast-root" role="status" aria-live="polite"></div>
+  <div id="menuRoot"></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

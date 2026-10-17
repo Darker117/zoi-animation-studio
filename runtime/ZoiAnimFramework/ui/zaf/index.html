@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Animations</title>
+<link rel="stylesheet" href="coui://inzoi/mod/inzoi-fonts.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+/* Required by the inZOI UI-mod host: transparent, no pointer-events:none on html/body. */
+html, body { width: 100%; height: 100%; background: transparent; overflow: hidden;
+             font-family: var(--inzoi-font-ui); font-size: 15px; color: #e8ebf5; }
+button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+#app-root { position: absolute; left: 1430px; top: 110px; width: 430px; height: 640px;
+            display: flex; flex-direction: column; overflow: hidden;
+            background: #2b2d33; border: none; border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(40, 10, 80, 0.45); }
+#title-bar { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+             padding: 7px 8px 7px 12px; background: #1c1d22; color: #f1edf4; cursor: move;
+             user-select: none; -webkit-user-select: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+#title-text { font-size: 15px; font-weight: bold; display: flex; align-items: center; }
+#title-text .dot { width: 8px; height: 8px; border-radius: 4px; background: #5c6480; margin-right: 8px; }
+#title-text .dot.on { background: #3cdac1; }
+#title-buttons { display: flex; align-items: center; }
+#minimize-btn, #close-btn { cursor: pointer; font-size: 13px; font-weight: bold; line-height: 1.4; margin-left: 6px;
+    font-family: var(--inzoi-font-mono, Consolas, monospace); background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.22); color: #fff; border-radius: 4px; padding: 1px 7px; }
+#minimize-btn:hover { background: rgba(255,255,255,0.25); }
+#close-btn { display: none; }
+#content { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+#resize-handle { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; cursor: nwse-resize;
+                 background: linear-gradient(135deg, transparent 50%, rgba(241,237,244,0.25) 50%); border-bottom-right-radius: 8px; }
+
+/* ---------------- panel ---------------- */
+.bar { display: flex; align-items: center; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+.bar > * { margin-right: 6px; }
+.bar > *:last-child { margin-right: 0; }
+.grow { flex: 1; min-width: 0; }
+select, input[type=text] { background: #1c1d22; border: 1px solid #1c1d22; border-radius: 4px; padding: 5px 8px; outline: none; color: #f1edf4; }
+select:focus, input[type=text]:focus { border-color: #3cdac1; }
+.btn { background: #383c40; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; white-space: nowrap; color: #f1edf4; }
+.btn:hover { background: #454a50; }
+.btn.primary { background: #3cdac1; color: #15161a; font-weight: bold; }
+.btn.primary:hover { background: #5fe6d0; }
+.btn.on { background: #1c1d22; color: #25c8e8; }
+.btn.danger { color: #ff6b8b; }
+.tabs { display: flex; flex-shrink: 0; padding: 0 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.tab { padding: 8px 10px; cursor: pointer; color: #8189a1; border-bottom: 2px solid transparent; font-weight: bold; font-size: 14px; }
+.tab.active { color: #f1edf4; border-bottom-color: #3cdac1; }
+.list { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 8px 10px; overscroll-behavior: contain; }
+.item { display: flex; align-items: center; padding: 7px 9px; margin-bottom: 4px; border-radius: 6px; background: #232529;
+        border: 1px solid transparent; cursor: pointer; }
+.item:hover { border-color: #3cdac1; }
+.item.playing { border-color: #3cdac1; background: rgba(60,218,193,0.10); }
+.item .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .meta { color: #8189a1; font-size: 12px; margin-left: 8px; white-space: nowrap; }
+.item .star { color: #6c6f77; margin-left: 8px; display: flex; }
+.item .star.on { color: #d9bc5f; }
+.section { color: #8189a1; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin: 10px 2px 6px; }
+.empty { color: #8189a1; text-align: center; padding: 26px 12px; line-height: 1.5; }
+.chips { display: flex; flex-wrap: wrap; padding: 6px 8px 0; flex-shrink: 0; }
+.chip { padding: 3px 10px; margin: 0 5px 5px 0; border-radius: 3px; background: #1c1d22; color: #c9c6cf; cursor: pointer; font-size: 13px; }
+.chip.active { background: #383c40; color: #3cdac1; }
+.slot { display: flex; align-items: center; margin-bottom: 6px; }
+.slot .label { width: 90px; color: #b9c0d4; }
+.status { flex-shrink: 0; padding: 6px 12px; font-size: 12px; color: #8189a1; border-top: 1px solid rgba(255,255,255,0.06); min-height: 28px;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status.err { color: #ff9bab; }
+.scene-card { padding: 10px; border-radius: 6px; background: #232529; border: 1px solid transparent; margin-bottom: 6px; cursor: pointer; }
+.scene-card.sel { border-color: #3cdac1; background: #1c1d22; }
+.scene-card .t { font-weight: bold; }
+.scene-card .d { color: #8189a1; font-size: 12px; margin-top: 2px; }
+.stage-row { display: flex; align-items: center; margin-top: 8px; }
+.stage-row .btn { margin-right: 6px; }
+.note { color: #8189a1; font-size: 12px; line-height: 1.5; padding: 4px 2px; }
+</style>
+</head>
+<body>
+<div id="app-root">
+  <div id="title-bar">
+    <span id="title-text"><span class="dot" id="zaf-dot"></span><span>Animations</span></span>
+    <div id="title-buttons">
+      <span id="minimize-btn">_</span>
+      <span id="close-btn">X</span>
+    </div>
+  </div>
+  <div id="content"></div>
+  <div id="resize-handle"></div>
+</div>
+<!-- Required by the inZOI UI-mod host, in this order: engine bridge, SDK, window manager, app. -->
+<script src="coui://inzoi/cohtml.js"></script>
+<script src="coui://inzoi/mod/inzoi-sdk.js"></script>
+<script src="window.js"></script>
+<script src="packs/installed.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+	"ProjectName": "ZoiAnimFramework",
+	"FriendlyName": "Zoi Animation Framework",
+	"Description": "Play animations, poses and multi-Zoi scenes on any Zoi. Animation packs made with Studio show up in the in-game Animations panel.",
+	"Author": "Zoi Animation Framework",
+	"Version": "1.0.0",
+	"Url": "",
+	"Dependencies": [],
+	"Assets": [],
+	"Maps": [],
+	"NonAssets": [
+		"/lua/lua_manifest.json",
+		"/lua/B2/Main.lua",
+		"/lua/B2/ZAF/json.lua",
+		"/ui/uimod_apps.json",
+		"/ui/zaf/uimod_manifest.json",
+		"/ui/zaf/index.html",
+		"/ui/zaf/window.js",
+		"/ui/zaf/app.js",
+		"/ui/zaf/packs/installed.js"
+	],
+	"FileChecksums": [],
+	"bEnable": true,
+	"LoadOrder": 1
+}

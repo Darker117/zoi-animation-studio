@@ -1,0 +1,16 @@
+{
+  "characters": [
+    {
+      "id": "zoi-figure-male",
+      "label": "Posing figure (male)",
+      "file": "zoi-figure-male.glb",
+      "credit": "Body: Blender Studio, Human Base Meshes v1.4.1 (CC0). Rigged to the Zoi skeleton."
+    },
+    {
+      "id": "zoi-figure-female",
+      "label": "Posing figure (female)",
+      "file": "zoi-figure-female.glb",
+      "credit": "Body: Blender Studio, Human Base Meshes v1.4.1 (CC0). Rigged to the Zoi skeleton."
+    }
+  ]
+}

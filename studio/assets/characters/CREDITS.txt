@@ -1,0 +1,9 @@
+Posing figures (zoi-figure-male.glb, zoi-figure-female.glb)
+
+Bodies: "Human Base Meshes" bundle v1.4.1 by Blender Studio
+https://www.blender.org/download/demo-files/#assets
+License: CC0 1.0 (public domain dedication). Attribution is not required but is given here with thanks.
+
+Changes: realistic male/female bodies at subdivision level 1, rigged to the 52-bone Zoi
+(VRM humanoid) skeleton with joints fitted to the mesh's anatomical face sets, and skinned
+with automatic weights. Rebuild with toolsiguresbuild_figures.ps1.

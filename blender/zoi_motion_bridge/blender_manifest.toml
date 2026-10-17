@@ -1,0 +1,19 @@
+schema_version = "1.0.0"
+
+id = "zoi_motion_bridge"
+version = "1.0.0"
+name = "Zoi Motion Bridge"
+tagline = "Put Studio animations on any armature for inZOI"
+maintainer = "Zoi Animation Framework"
+type = "add-on"
+
+tags = ["Animation", "Import-Export", "Rigging"]
+
+blender_version_min = "4.2.0"
+
+license = [
+  "SPDX:MIT",
+]
+
+[permissions]
+files = "Read .zmotion projects and presets, write FBX files and presets"

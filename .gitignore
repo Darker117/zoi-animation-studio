@@ -1,0 +1,14 @@
+# Build output (the installer goes on the GitHub release instead)
+dist/
+installer/build/
+
+# Python / Blender
+__pycache__/
+*.pyc
+*.blend1
+
+# Editors and OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

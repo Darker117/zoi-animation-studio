@@ -1,0 +1,21 @@
+{
+	"name": "zaf",
+	"version": "1.0.0",
+	"description": "Zoi Animation Framework: play animations, poses and multi-Zoi scenes on any Zoi.",
+	"author": "Zoi Animation Framework",
+	"entry": "index.html",
+	"display": {
+		"width": 1920,
+		"height": 1080,
+		"transparent": true,
+		"input_policy": "overlay"
+	},
+	"triggers": [
+		{
+			"id": "zaf",
+			"type": "game_mode",
+			"mode": "gameplay",
+			"action": "show"
+		}
+	]
+}

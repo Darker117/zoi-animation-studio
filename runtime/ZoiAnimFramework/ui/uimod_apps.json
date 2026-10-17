@@ -1,0 +1,5 @@
+{
+  "apps": [
+    { "name": "zaf", "enabled": true }
+  ]
+}
