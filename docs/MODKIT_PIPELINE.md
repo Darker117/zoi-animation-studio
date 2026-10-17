@@ -21,7 +21,7 @@ What is **not** done yet (details in [Remaining work](#remaining-work)):
 
 ## Requirements
 
-* **inZOI ModKit** from the Epic Games Store, free, about 100 GB installed (`InstallSize` 100,241,143,837 bytes). On this PC it is at `C:\Users\MSI\Documents\inZOIModKit`. The tool finds it from the Epic Launcher manifests (`C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\*.item`, `DisplayName` = `inZOI ModKit`), or from `-ModKitRoot` / `%ZAF_MODKIT_ROOT%`.
+* **inZOI ModKit** from the Epic Games Store, free, about 100 GB installed (`InstallSize` 100,241,143,837 bytes). It is usually installed at `Documents\inZOIModKit`. The tool finds it from the Epic Launcher manifests (`C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\*.item`, `DisplayName` = `inZOI ModKit`), or from `-ModKitRoot` / `%ZAF_MODKIT_ROOT%`.
 * The ModKit window must be **closed** while a build runs. Both would write the same project; the tool checks for this and stops with a message.
 * Nothing else. PowerShell 5.1 and the ModKit's own Python 3.11 are used; no extra installs.
 
@@ -51,7 +51,7 @@ Studio bridge (`bridge/server.ps1`). Paths are relative to `Documents\Zoi Motion
 
 Both POST endpoints answer 503 with "The ModKit tools are not installed" when `tools\modkit` is missing next to `bridge\`. The bridge itself starts either way. For the installed app to build mods, the installer has to ship `tools\modkit\build_mod.ps1` and `tools\modkit\zaf_modkit.py`.
 
-A build installs the mod as `Documents\inZOI\Mods\<project>` (for example `ZAF_Cute_Couple_1A2B3C4D`). This is the same top-level folder Vortex installs mods into on this PC. The ModKit's own Package button uses `Documents\inZOI\Mods\<CurseForge user id>` instead (`88849` here). Restart inZOI to load a new or rebuilt mod.
+A build installs the mod as `Documents\inZOI\Mods\<project>` (for example `ZAF_Cute_Couple_1A2B3C4D`). This is the same top-level folder mod managers such as Vortex install mods into. The ModKit's own Package button uses `Documents\inZOI\Mods\<your CurseForge user id>` instead. Restart inZOI to load a new or rebuilt mod.
 
 Rebuilding a pack updates the same project and mod folder: `<pack>\modkit_build.json` remembers the project name. Each build leaves `job.json`, `result.json`, `status.json` and the two logs (`modkit_editor.log`, `modkit_package.log`) in `<pack>\modkit_build\`.
 
