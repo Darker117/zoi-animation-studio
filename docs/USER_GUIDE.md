@@ -58,7 +58,7 @@ This guide explains every part of Studio. The step-by-step path from a finished 
 
 ### Running Setup
 
-1. Download **`Studio-Setup-1.1.1.exe`** (or newer) from the project's Releases page.
+1. Download **`Studio-Setup-1.1.2.exe`** (or newer) from the project's Releases page.
 2. Double-click it. Setup installs for your Windows account only, so there is no administrator prompt.
    * If Windows shows **"Windows protected your PC"**, click **More info**, then **Run anyway**. This appears because the installer is not code-signed yet.
 3. **Welcome page:** click **Next**.

@@ -26,7 +26,7 @@ The guides are also installed with the app, in the `docs` folder of Studio's ins
 
 ## Install
 
-Run **`Studio-Setup-1.1.1.exe`** (or newer) and follow the setup wizard. It installs for your Windows account only (no administrator prompt), adds **Studio** to the Start menu (and the desktop if you tick it), and can optionally install the in-game framework mod when inZOI is found.
+Run **`Studio-Setup-1.1.2.exe`** (or newer) and follow the setup wizard. It installs for your Windows account only (no administrator prompt), adds **Studio** to the Start menu (and the desktop if you tick it), and can optionally install the in-game Zoi Animation Studio mod when inZOI is found.
 
 * Needs Windows 10 or 11 (64-bit) and the Microsoft Edge WebView2 Runtime, which is built into Windows 11. Setup tells you if it's missing.
 * Windows may show "Windows protected your PC" the first time, because the installer isn't code-signed yet: choose **More info → Run anyway**.

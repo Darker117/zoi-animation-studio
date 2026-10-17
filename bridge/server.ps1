@@ -14,7 +14,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$Version = '1.1.1'
+$Version = '1.1.2'
 $StudioRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\studio')).Path
 $DataDir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Zoi Motion Studio'
 New-Item -ItemType Directory -Force -Path $DataDir | Out-Null
