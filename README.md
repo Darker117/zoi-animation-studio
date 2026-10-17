@@ -14,11 +14,19 @@ The framework has two halves:
 
 > Unofficial fan project. Not affiliated with KRAFTON or inZOI Studio.
 
+## Documentation
+
+* **[Studio user guide](docs/USER_GUIDE.md)**: install, every panel, tool, menu, shortcut and dialog, Describe a motion (AI), Act it out, import, multi-Zoi scenes, export and troubleshooting, with screenshots.
+* **[Getting your animations into inZOI](docs/ANIMATIONS_IN_INZOI.md)**: the live link, a step-by-step inZOI ModKit walkthrough, the in-game Animations panel, multi-Zoi scenes and a reference for modders who ship packs.
+* [File formats](docs/PACK_FORMAT.md) (`.zmotion`, `zaf_pack.json`) and the [automatic ModKit build prototype](docs/MODKIT_PIPELINE.md).
+
+The guides are also installed with the app, in the `docs` folder of Studio's install folder.
+
 ---
 
 ## Install
 
-Run **`Studio-Setup-1.1.0.exe`** and follow the setup wizard. It installs for your Windows account only (no administrator prompt), adds **Studio** to the Start menu (and the desktop if you tick it), and can optionally install the in-game framework mod when inZOI is found.
+Run **`Studio-Setup-1.1.1.exe`** (or newer) and follow the setup wizard. It installs for your Windows account only (no administrator prompt), adds **Studio** to the Start menu (and the desktop if you tick it), and can optionally install the in-game framework mod when inZOI is found.
 
 * Needs Windows 10 or 11 (64-bit) and the Microsoft Edge WebView2 Runtime, which is built into Windows 11. Setup tells you if it's missing.
 * Windows may show "Windows protected your PC" the first time, because the installer isn't code-signed yet: choose **More info → Run anyway**.
@@ -31,7 +39,7 @@ To build the installer yourself: install [Inno Setup](https://jrsoftware.org/isi
 
 1. Open **Studio** from the Start menu. (From a downloaded folder instead, double-click **`Start Studio.bat`**: a small window opens, keep it open, and the studio opens in your browser.)
 2. Click a body part on the Zoi and **drag it**. Hands and feet reach (IK); drag the hips to crouch while the feet stay planted.
-3. Move the red playhead on the timeline, pose again. **Auto-key** saves every change as a key.
+3. Move the teal playhead on the timeline, pose again. **Auto-key** saves every change as a key.
 4. Press **Space** to play.
 5. **Live in inZOI** (top bar) streams to your Zoi; **Export** builds a pack.
 
@@ -83,7 +91,8 @@ The app opens in its own window and also works offline. Behind it, a small helpe
 
 * **Animations**: search and play any animation the game knows, or your packs' animations, on any Zoi (you, your household, or anyone nearby). Favorites, loop and *Hold still* (pauses free will).
 * **Scenes**: pick a multi-Zoi scene from a pack and assign a Zoi to each role. The framework lines them up face to face, freezes their free will and plays the stages in order. Skip to the next stage or stop at any time.
-* **Packs**: install packs from the studio (**Export → Install into my game**), or as separate mods. A pack mod only needs to ship `lua/B2/ZAF_Packs.lua` returning `{ register = function(api) api.add(<pack manifest table>) end }`. The framework collects every installed pack, like AAF packs in Fallout 4.
+* **Studio**: shows whether Studio and the framework's Lua director are running, and reloads packs.
+* **Packs** appear under *My packs* and on the Scenes tab. Install them from the studio (**Export → Install into my game**), or ship them as separate mods: a pack mod registers its manifest from `lua/B2/ZAF_Packs.lua` returning `{ register = function(api) api.add(<pack manifest table>) end }`. The framework collects every installed pack, like AAF packs in Fallout 4. See [the modder reference](docs/ANIMATIONS_IN_INZOI.md#8-for-modders-shipping-a-pack-as-its-own-mod).
 
 The studio's **Export → Install into my game** installs the framework mod into `Documents\inZOI\Mods\InGame\ZoiAnimFramework` the first time.
 
@@ -107,7 +116,7 @@ Install it from *Edit → Preferences → Get Extensions → ⌄ → Install fro
 | **Live link** | Turn on Motion Capture in inZOI, press *Start streaming* | No: lasts while the studio streams |
 | **ModKit** | Export a pack, follow the setup sheet in the inZOI ModKit (free on the Epic Games Store) | Yes: a real mod you can share on CurseForge |
 
-For a bone-for-bone match with in-game Zois, export the Zoi skeleton from the ModKit once, load it in the studio (**Import → Use as character**), and export with **Skeleton: Loaded character**.
+For a bone-for-bone match with in-game Zois, export the ModKit's Zoi body (`SKM_Base_Body` on `SK_Base`) to FBX once, load it on every Zoi in the studio (**Import → Use as character**), and export with **Skeleton: Loaded character**. The whole route, step by step, is in [Getting your animations into inZOI](docs/ANIMATIONS_IN_INZOI.md).
 
 ---
 
@@ -121,7 +130,11 @@ studio/                        the studio (HTML/JS, three.js vendored in studio/
 bridge/server.ps1              local helper: serves the studio, live link, saving, inZOI detection
 runtime/ZoiAnimFramework/      the in-game mod (Lua director + Animations panel)
 blender/                       Blender add-on: apply .zmotion projects to any armature, export for the ModKit
+docs/USER_GUIDE.md             the Studio user guide (screenshots in docs/images)
+docs/ANIMATIONS_IN_INZOI.md    live link, ModKit walkthrough, in-game panel, modder reference
 docs/PACK_FORMAT.md            .zmotion and zaf_pack.json formats, live-link details
+docs/MODKIT_PIPELINE.md        the automatic ModKit build prototype (tools/modkit)
+tools/docs/                    renders the documentation screenshots (headless Edge)
 tools/vmc_monitor.py           debug listener for the live link
 tools/figures/                 Blender scripts that rig the posing figures from Human Base Meshes
 tests/fixtures/                regression files (walk cycle in several formats)

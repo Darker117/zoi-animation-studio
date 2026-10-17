@@ -509,7 +509,7 @@
         var list = el('div', 'list');
         var all = scenes();
         if (!all.length) {
-            list.appendChild(el('div', 'empty', 'No scenes yet. Scenes come from animation packs: make one in Studio (Export → Install to inZOI), or install a pack mod.'));
+            list.appendChild(el('div', 'empty', 'No scenes yet. Scenes come from animation packs: make one in Studio (Export → Install into my game), or install a pack mod.'));
             content.appendChild(list);
             return;
         }

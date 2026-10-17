@@ -3,7 +3,7 @@
 ; passes them in as defines.
 
 #ifndef AppVersion
-  #define AppVersion "1.1.0"
+  #define AppVersion "1.1.1"
 #endif
 #ifndef BannerImages
   #define BannerImages "art\banner-source.jpg"

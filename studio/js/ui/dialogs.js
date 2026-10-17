@@ -210,7 +210,7 @@ export async function loadInzoiBody(app) {
     title: 'Load the inZOI body',
     content: h('div', {},
       h('p', { style: { marginTop: 0 } }, 'inZOI ships its body-tracking Zoi with the game. Pick this file:'),
-      h('div.code', {}, '…\steamapps\common\inZOI\Guides\MotionCapture\BodyTrackingVrm.vrm'),
+      h('div.code', {}, '…\\steamapps\\common\\inZOI\\Guides\\MotionCapture\\BodyTrackingVrm.vrm'),
       h('p.hint-text', {}, 'It stays on your PC (the studio never uploads or redistributes it). Start the studio with "Start Studio.bat" and it is found automatically.')),
     buttons: [{ label: 'Cancel' }, { label: 'Choose file…', primary: true, onClick: async () => { const f = await pickFile('.vrm'); if (f) attachVrm(app, await f.arrayBuffer(), f.name); } }],
   });
@@ -239,14 +239,14 @@ export function packSettings(app) {
     content: h('div', {},
       field('name', 'Pack name', 'Cute Couple Animations'),
       field('author', 'Author', 'your name'),
-      field('id', 'Pack id', 'author.packname'),
+      field('id', 'Pack id', 'yourname_packname'),
       field('version', 'Version', '1.0.0'),
       field('description', 'Description', 'What is in this pack?', 'textarea'),
-      h('p.hint-text', {}, 'The pack id must be unique; it prefixes every exported file so packs never clash in the game.')),
+      h('p.hint-text', {}, 'The pack id must be unique; it prefixes every exported file so packs never clash in the game. Use letters, numbers and _ (other characters are removed).')),
     buttons: [{ label: 'Cancel' }, { label: 'Save', primary: true, onClick: () => {
       app.structural('Pack settings', () => {
         for (const k of Object.keys(f)) p[k] = f[k].value.trim();
-        p.id = slug(p.id || `${p.author}.${p.name}`, 'mypack').toLowerCase();
+        p.id = slug(p.id || `${p.author}_${p.name}`, 'mypack').toLowerCase();
       });
       app.emit('project');
     } }],
@@ -278,8 +278,8 @@ export function exportDialog(app) {
       ]));
     if (opts.format === 'modkit' || opts.format === 'fbx' || opts.format === 'bvh') {
       const sk = [];
-      if (anyChar) sk.push(['character', `Loaded character (${anyChar.loaded.name})`, 'Bone-for-bone match. Use the inZOI skeleton from the ModKit here.', 'user']);
-      if (opts.format !== 'bvh') sk.push(['unreal', 'Unreal mannequin names', 'root/pelvis/spine_01… Retarget in Unreal if inZOI\'s skeleton differs.', 'bone']);
+      if (anyChar) sk.push(['character', `Loaded character (${anyChar.loaded.name})`, 'Bone-for-bone match. For inZOI, load the ModKit\'s Zoi body (SKM_Base_Body) first.', 'user']);
+      if (opts.format !== 'bvh') sk.push(['unreal', 'Unreal mannequin names', 'root/pelvis/spine_01… For other Unreal projects; for the inZOI ModKit use Loaded character with the Zoi body.', 'bone']);
       sk.push(['inzoiVrm', 'inZOI body-tracking names', 'J_Bip_C_Hips… (the BodyTrackingVrm skeleton)', 'bone'], ['vrm', 'VRM humanoid names', 'hips, leftUpperArm…', 'bone'], ['mixamo', 'Mixamo names', 'mixamorig:Hips…', 'bone']);
       if (!sk.find((s) => s[0] === opts.skeleton)) opts.skeleton = sk[0][0];
       body.append(h('div.section-title', { style: { marginTop: '14px' } }, 'Skeleton'), cards('skeleton', sk));
@@ -409,7 +409,7 @@ export function liveDialog(app) {
     body.innerHTML = '';
     const ok = bridge.available || (await bridge.detect());
     const host = h('input', { type: 'text', value: v.host, onchange: () => { v.host = host.value.trim() || '127.0.0.1'; app.saveVmcPrefs(); } });
-    const port = h('input.inline-num', { type: 'number', value: v.port, onchange: () => { v.port = +port.value || 39539; app.saveVmcPrefs(); } });
+    const port = h('input.inline-num', { type: 'number', value: v.port, style: { width: '84px' }, onchange: () => { v.port = +port.value || 39539; app.saveVmcPrefs(); } });
     const fps = h('select', { onchange: () => { v.fps = +fps.value; app.saveVmcPrefs(); } }, [24, 30, 60].map((x) => h('option', { value: x, selected: v.fps === x }, `${x} per second`)));
     const who = h('select', { onchange: () => { app.liveSlotId = who.value; } }, app.scene.actors.map((s) => h('option', { value: s.id, selected: (app.liveSlotId || app.activeSlotId) === s.id }, s.name)));
     const bundle = h('input', { type: 'checkbox', checked: v.bundle, onchange: () => { v.bundle = bundle.checked; app.saveVmcPrefs(); } });
@@ -428,7 +428,7 @@ export function liveDialog(app) {
         h('div.row', {}, h('label', {}, 'Send rate'), fps),
         h('div.row', {}, h('label', {}, 'Drive'), who),
         h('div.row', {}, h('label', {}, 'Bundle'), bundle, h('span.muted.small', {}, 'one packet per frame (turn off if your Zoi does not move)')))),
-      !ok ? h('p.hint-text', {}, 'Live streaming needs the small local bridge. Close this tab and start the studio with "Start Studio.bat".') : null);
+      ...(ok ? [] : [h('p.hint-text', {}, 'Live streaming needs the small local bridge. Close this tab and start the studio with "Start Studio.bat".')]));
   };
   render();
   const m = modal({
@@ -460,11 +460,11 @@ export function inzoiGuide() {
         h('div.option-card', {}, h('b', { html: icon('gamepad', 16) + 'Permanently: ModKit' }), h('span', {}, 'Export an inZOI pack, then follow the setup sheet inside it to build a mod with the inZOI ModKit (free on the Epic Games Store).'))),
       h('div.section-title', { style: { marginTop: '16px' } }, 'ModKit in short'),
       h('ol.steps', {},
-        h('li', {}, 'In the ModKit, export the Zoi skeleton/body once (Resources → Provided Unreal Assets) and load it here with Import → "Use as character". Then export with Skeleton = "Loaded character" for a perfect match.'),
-        h('li', {}, 'Import each FBX from the pack\'s Animations folder onto the Zoi skeleton.'),
-        h('li', {}, 'Create the animation config the setup sheet tells you: Interaction (Animation Montage), Locomotion (idle / walk) or Stat Locomotion (mood walks), with the Gender and Growth Step listed.'),
+        h('li', {}, 'Export the ModKit\'s Zoi body (SKM_Base_Body) to FBX once, and load it on every Zoi here with Import → "Use as character". Then export with Skeleton = "Loaded character" for a perfect match.'),
+        h('li', {}, 'In the ModKit, import each FBX from the pack\'s Animations folder onto the Zoi skeleton (SK_Base), animation only.'),
+        h('li', {}, 'Follow the setup sheet in the export folder: one Character Animation (Interaction) entry per stage and Zoi, named exactly as listed, or the Locomotion / Stat Locomotion settings for walks and idles.'),
         h('li', {}, 'Export the mod locally or to CurseForge from the ModKit.')),
-      h('p.hint-text', {}, 'Official docs: mod-docs.playinzoi.com → ModKit → How To → Animation.')),
+      h('p.hint-text', {}, 'Full walkthrough: docs\\ANIMATIONS_IN_INZOI.md in Studio\'s install folder. Official docs: mod-docs.playinzoi.com → Animation → CharacterAnimation.')),
     buttons: [{ label: 'Close', primary: true }],
   });
 }
@@ -473,7 +473,7 @@ export function inzoiGuide() {
 
 export async function textToMotion(app) {
   const ai = await import('../ai/text2motion.js');
-  const prompt = h('textarea', { rows: 3, placeholder: 'a person waves both hands excitedly, then jumps' }, prefGet('ai.prompt', ''));
+  const prompt = h('textarea', { rows: 3, style: { flex: '1', width: '100%' }, placeholder: 'a person waves both hands excitedly, then jumps' }, prefGet('ai.prompt', ''));
   const secs = h('input.inline-num', { type: 'number', min: 2, max: 9.8, step: 0.5, value: prefGet('ai.secs', 4) });
   const bar = h('div.progress', {}, h('div'));
   const barLabel = h('div.muted.small', { style: { marginTop: '6px', minHeight: '16px' } });
@@ -482,7 +482,13 @@ export async function textToMotion(app) {
   let polling = null;
   let busy = false;
 
-  const setBar = (fraction, label = '') => { bar.firstChild.style.width = Math.round(fraction * 100) + '%'; barLabel.textContent = label; };
+  // The progress bar stays hidden until Generate is pressed.
+  const setBar = (fraction, label = '') => {
+    bar.style.display = barLabel.style.display = fraction || label ? '' : 'none';
+    bar.firstChild.style.width = Math.round(fraction * 100) + '%';
+    barLabel.textContent = label;
+  };
+  setBar(0);
   // The card above the prompt explains what the AI is doing when it is not ready yet.
   const renderCard = () => {
     card.innerHTML = '';
@@ -490,7 +496,8 @@ export async function textToMotion(app) {
     if (status.ready) return;
     const title = { loading: 'Starting the AI', starting: 'Starting the AI', installing: 'Downloading the AI model',
       missing: 'The AI model is not downloaded yet', unavailable: 'AI not included', error: 'The AI could not start', offline: 'Studio\'s helper is not running' }[status.state] || 'AI not ready';
-    card.append(h('b', {}, title), h('p.hint-text', { style: { margin: '4px 0 0' } }, status.message || ''));
+    const same = (status.message || '').replace(/\.$/, '').toLowerCase() === title.toLowerCase();
+    card.append(h('b', {}, title), same ? '' : h('p.hint-text', { style: { margin: '4px 0 0' } }, status.message || ''));
     if (status.state === 'installing') {
       const p = h('div.progress', { style: { marginTop: '10px' } }, h('div'));
       p.firstChild.style.width = (status.percent || 0) + '%';

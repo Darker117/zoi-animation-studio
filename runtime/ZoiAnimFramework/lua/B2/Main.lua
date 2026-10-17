@@ -10,9 +10,9 @@
 --   Lua -> UI  : inzoi.message.send_to_client(entity, "zaf", <json>)  -> JS event 'lua_message.zaf'
 --
 -- Pack hook: any mod can ship  lua/B2/ZAF_Packs.lua  returning
---   { register = function(api) api.add({ zaf = 1, id = "author.pack", name = "...", scenes = {...}, animations = {...} }) end }
--- Same-named modules from every installed mod are merged by the game's Lua loader, so one
--- require() call reaches all of them.
+--   { register = function(api) api.add({ zaf = 1, id = "yourname_couple", name = "...", scenes = {...}, animations = {...} }) end }
+-- The game's Lua loader is expected to merge same-named modules from every installed mod, so one
+-- require() call reaches all of them (not verified in the game yet).
 
 local M = {}
 local VERSION = "1.0.0"

@@ -133,7 +133,8 @@ export function mountInspector(app) {
     body.append(h('div.section', {}, h('div.section-title', {}, `Stage ${app.stageIdx + 1} of ${scene.stages.length}`),
       h('div.card', {},
         h('div.row', {}, h('label', {}, 'Stage name'), stName),
-        h('div.row', {}, h('label', {}, 'Length'), secs, h('span.muted', {}, 's ='), frames, h('span.muted', {}, 'frames')),
+        h('div.row', {}, h('label', {}, 'Length'), secs, h('span.muted', {}, 'seconds')),
+        h('div.row', {}, h('label', {}, 'Frames'), frames),
         h('div.row', {}, h('label', {}, 'Frame rate'), fps),
         h('div.row', {}, h('label', {}, 'Loops'), loop, h('span.muted.small', {}, 'plays seamlessly on repeat')),
         st.loop ? h('div.row', {}, h('label', {}, 'Plays'), loopCount, h('span.muted.small', {}, 'times in-game (-1 = until stopped)')) : null)));

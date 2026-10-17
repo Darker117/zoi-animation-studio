@@ -826,7 +826,7 @@ class App extends EventTarget {
   }
 
   async newProject() {
-    if (!(await confirmDialog('Start a new pack?', 'Your current work stays in your browser autosave until you start editing the new pack. Save it first if you want a file copy.', { okLabel: 'New pack' }))) return;
+    if (!(await confirmDialog('Start a new pack?', 'The new pack replaces your current work, including its autosave. Save the current pack first (File → Save project) if you want to keep it.', { okLabel: 'New pack' }))) return;
     this.project = createProject();
     this.characters.forEach((c) => c.dispose());
     this.characters.clear();

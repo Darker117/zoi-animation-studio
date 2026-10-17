@@ -82,67 +82,92 @@ export function buildSetupSheet(project, manifest) {
   const sections = manifest.scenes.map((s) => {
     const kind = SCENE_KINDS[s.kind]?.label || s.kind;
     const totalLen = s.stages.reduce((t, st) => t + st.duration, 0);
-    const loopStage = s.stages.find((st) => st.loop);
-    const genders = (g) => (g === 'Any' ? ['Female', 'Male'] : [g]);
+    // Anim Info List entries as inZOI's own rows use them: Adult and Teen share the Adult entries,
+    // children use Gender "Default" with Anim Growth Step "Youth".
+    const genders = (a) => (a.growth === 'Child' ? ['Default'] : a.gender === 'Any' ? ['Female', 'Male'] : [a.gender]);
+    const growthStep = (a) => (a.growth === 'Child' ? 'Youth' : 'Adult');
+    const fileOf = (id) => manifest.animations.find((x) => x.id === id)?.file || id;
+    const table = (head, body) => `<div class="scroll"><table class="grid"><thead><tr>${head.map((x) => `<th>${x}</th>`).join('')}</tr></thead><tbody>${body.join('')}</tbody></table></div>`;
+    // The Zoi Animation Framework plays one Character Animation entry per stage and Zoi, named after its id.
+    const entries = [];
+    s.stages.forEach((st) => st.animations.forEach((id, ai) => {
+      if (!id) return;
+      const a = s.actors[ai];
+      const plays = st.loop ? st.loopCount : 1;
+      const total = plays === -1 ? `${round(st.duration, 2)} s (loops until stopped)` : `${round(st.duration * Math.max(1, plays), 2)} s`;
+      entries.push(`<tr><td><code>${esc(id)}</code></td><td>${esc(a.name)}</td><td>${esc(st.name)}</td><td>${st.loop ? 'yes' : 'no'}</td><td>${genders(a).join(', ')}</td><td>${growthStep(a)}</td><td>${total}</td><td>${st.loop ? round(st.duration, 2) + ' s' : '—'}</td></tr>`);
+    }));
     const rows = [];
     s.actors.forEach((a, ai) => {
-      for (const g of genders(a.gender)) {
-        const files = s.stages.map((st) => st.animations[ai]).filter(Boolean).map((id) => manifest.animations.find((x) => x.id === id)?.file || id);
-        rows.push(`<tr><td>${esc(a.name)}</td><td>${g}</td><td>${esc(a.growth)}</td><td>${files.map((f) => `<code>${esc(f)}</code>`).join('<br>')}</td></tr>`);
+      for (const g of genders(a)) {
+        const files = s.stages.map((st) => st.animations[ai]).filter(Boolean).map(fileOf);
+        rows.push(`<tr><td>${esc(a.name)}</td><td>${g}</td><td>${growthStep(a)}</td><td>${files.map((f) => `<code>${esc(f)}</code>`).join('<br>')}</td></tr>`);
       }
     });
+    const ids = s.stages.flatMap((st) => st.animations.filter(Boolean));
+    const panelStep = `<li>Optional: to play it from the Zoi Animation Framework's Animations panel too, make an <b>Animation Montage</b> from it and create a <b>Character Animation (Interaction)</b> entry named exactly <code>${esc(ids.join(', '))}</code>, set up the way the sheet describes for interactions.</li>`;
     let steps = '';
     if (s.kind === 'interaction' || s.kind === 'pose') {
       steps = `
         <ol>
-          <li>Import the FBX file(s) below onto the <b>Zoi skeleton</b> (one Animation Sequence each).</li>
-          <li>Name the Character Animation entry exactly <code>${esc(s.stages.map((st) => st.animations.filter(Boolean).join(', ')).join(' / '))}</code> (one entry per Zoi role) so the Zoi Animation Framework panel can play it.</li>
-          <li>Create an <b>Animation Montage</b> from them.${s.stages.length > 1 ? ` Add the stages as montage sections in this order: ${s.stages.map((st) => `<code>${esc(st.section)}</code> (${esc(st.name)})`).join(' → ')}.` : ''}</li>
-          <li>In <b>Animation → Character Animation → Interaction</b> set:
+          <li>Import the file of every entry in the table (<code>Animations/&lt;Entry name&gt;.fbx</code>) onto the <b>inZOI template skeleton</b>: in the import options set <b>Skeleton</b> to the Zoi skeleton and keep animation import on. Each file becomes an <b>Animation Sequence</b>.</li>
+          <li>Make an <b>Animation Montage</b> from each sequence (right-click it → Create → AnimMontage) and keep its single <code>Default</code> section.${s.stages.some((st) => st.loop) ? ' For entries marked <b>Loops</b>, add a notify track named <code>Loop</code> with <code>B1AnimNotify_LoopStart</code> at 0 s and <code>B1AnimNotify_LoopEnd</code> just before the end, the way inZOI\'s own looping montages are marked.' : ''}</li>
+          <li>In the ModKit's Data Editor, add one <b>Character Animation (Interaction)</b> row per entry (table <code>AnimCharacter_Interaction</code>; duplicating an existing interaction such as <code>Self_Angry</code> works) and set its Id to <b>exactly</b> the <b>Entry name</b>. The Zoi Animation Framework plays animations by these names, one stage at a time.</li>
+          <li>Set each entry up like this:
             <table class="kv">
               <tr><th>Playing Component Name</th><td>Root</td></tr>
-              <tr><th>Start Anim Section</th><td>${esc(s.stages[0].section)}</td></tr>
-              <tr><th>Anim Posture Type</th><td>${esc(s.inzoi.posture || 'Stand')}</td></tr>
-              <tr><th>Total Play Length</th><td>${round(totalLen, 2)} s</td></tr>
-              <tr><th>Loop Play Length</th><td>${loopStage ? round(loopStage.duration, 2) + ' s' : '— (not looping)'}</td></tr>
-              <tr><th>Rate Scale</th><td>${s.inzoi.rateScale ?? 1}</td></tr>
+              <tr><th>Start Anim Section</th><td>Default</td></tr>
+              <tr><th>Stop Other Component on Finish</th><td>off</td></tr>
+              <tr><th>Character Anim Config List</th><td>one element:</td></tr>
+              <tr><th class="in1">Anim Posture Type</th><td>${esc(s.inzoi.posture || 'Stand')}</td></tr>
+              <tr><th class="in1">Anim Body Parts, Grab Parts, Slot Direction</th><td>None</td></tr>
+              <tr><th class="in1">Anim Info List</th><td>one entry per Gender in the row:</td></tr>
+              <tr><th class="in2">Gender, Anim Growth Step</th><td>from the table</td></tr>
+              <tr><th class="in2">Animation</th><td>the montage made from the entry's file</td></tr>
+              <tr><th class="in2">Total Play Length, Loop Play Length</th><td>filled in by the ModKit when you pick the montage; check them against the table</td></tr>
+              <tr><th class="in2">Rate Scale</th><td>${s.inzoi.rateScale ?? 1}</td></tr>
             </table>
           </li>
-          <li>Add one <b>Anim Info List</b> entry per row of the table below (Gender + Anim Growth Step + Animation).</li>
-          ${s.actors.length > 1 ? `<li>This is a <b>${s.actors.length}-Zoi scene</b>: give each Zoi its own animation through a co-op interaction (initiator = ${esc(s.actors[0].name)}, target = ${esc(s.actors[1].name)}). Place the target at X ${s.actors[1].offset.x} m, Z ${s.actors[1].offset.z} m, facing ${s.actors[1].offset.yaw}° relative to the initiator.</li>` : ''}
-        </ol>`;
+          ${s.actors.length > 1 ? `<li>This is a <b>${s.actors.length}-Zoi scene</b>: every Zoi has its own entries. The Zoi Animation Framework lines the Zois up around ${esc(s.actors[0].name)} and starts their entries for each stage together. Placement relative to ${esc(s.actors[0].name)} (X to its left, Z forward, in metres): ${s.actors.slice(1).map((a) => `${esc(a.name)} at X ${a.offset.x}, Z ${a.offset.z}, facing ${a.offset.yaw}°`).join('; ')}.</li>` : ''}
+        </ol>
+        ${table(['Entry name', 'Zoi', 'Stage', 'Loops', 'Gender', 'Anim Growth Step', 'Total Play Length', 'Loop Play Length'], entries)}`;
     } else if (s.kind === 'locomotion') {
       steps = `
         <ol>
-          <li>Import the FBX onto the <b>Zoi skeleton</b> as an Animation Sequence.</li>
-          <li>In <b>Animation → Character Animation → Locomotion</b> pick the Gender and Anim Growth Step below, then either set it as the <b>Idle Anim</b> or add it to <b>Idle Random Anims</b> with:
+          <li>Import the file(s) below onto the <b>inZOI template skeleton</b> as an <b>Animation Sequence</b>.</li>
+          <li>In <b>Character Animation → Locomotion</b>, for each row of the table set <b>Gender</b> and <b>Anim Growth Step</b>, then either set the sequence as the <b>Idle Anim</b> or add it under <b>Idle Random Anims</b> with:
             <table class="kv">
+              <tr><th>Animation</th><td>this sequence</td></tr>
               <tr><th>Emotion Id</th><td>${esc(s.inzoi.emotionId || '(leave empty)')}</td></tr>
               <tr><th>Emotion Level</th><td>0</td></tr>
               <tr><th>Chance to Play</th><td>${s.inzoi.chanceToPlay ?? 1}</td></tr>
             </table>
           </li>
-        </ol>`;
+          ${panelStep}
+        </ol>
+        ${table(['Zoi', 'Gender', 'Anim Growth Step', 'Animation file(s)'], rows)}`;
     } else if (s.kind === 'statLocomotion') {
       steps = `
         <ol>
-          <li>Import the FBX onto the <b>Zoi skeleton</b> as an Animation Sequence.</li>
-          <li>In <b>Animation → Character Animation → Stat Locomotion</b> add an entry:
+          <li>Import the file(s) below onto the <b>inZOI template skeleton</b> as an <b>Animation Sequence</b>.</li>
+          <li>In <b>Character Animation → Stat Locomotion</b>, for each row of the table set <b>Gender</b> and <b>Anim Growth Step</b>, then add an entry under <b>Stat Locomotions</b>:
             <table class="kv">
               <tr><th>Stat Id</th><td>${esc(s.inzoi.statId || '(choose the stat, e.g. Tired)')}</td></tr>
               <tr><th>Stat Value</th><td>${s.inzoi.statValue ?? 0}</td></tr>
-              <tr><th>Stat Walk Anim</th><td>this animation (walk cycles)</td></tr>
-              <tr><th>Idle Random Anims</th><td>this animation (idles)</td></tr>
+              <tr><th>Stat Walk Anim</th><td>this sequence, if it is a walk cycle</td></tr>
+              <tr><th>Idle Random Anims</th><td>this sequence, if it is an idle</td></tr>
             </table>
+            Leave the walk times, swim and face fields as they are unless you need them.
           </li>
-        </ol>`;
+          ${panelStep}
+        </ol>
+        ${table(['Zoi', 'Gender', 'Anim Growth Step', 'Animation file(s)'], rows)}`;
     }
     return `
       <section>
         <h2>${esc(s.name)} <span class="tag">${esc(kind)}</span>${s.actors.length > 1 ? ` <span class="tag">${s.actors.length} Zois</span>` : ''}</h2>
         <p class="meta">${s.stages.length} stage${s.stages.length > 1 ? 's' : ''} · ${round(totalLen, 2)} s${s.tags.length ? ' · tags: ' + s.tags.map(esc).join(', ') : ''}</p>
         ${steps}
-        <table class="grid"><thead><tr><th>Zoi</th><th>Gender</th><th>Anim Growth Step</th><th>Animation file(s)</th></tr></thead><tbody>${rows.join('')}</tbody></table>
       </section>`;
   }).join('\n');
 
@@ -164,6 +189,10 @@ export function buildSetupSheet(project, manifest) {
   code { font: 13px Consolas, monospace; background: color-mix(in srgb, var(--accent) 10%, transparent); padding: 1px 5px; border-radius: 5px; }
   .intro { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; }
   li { margin: 6px 0; }
+  .scroll { overflow-x: auto; }
+  .grid td:first-child code { white-space: nowrap; }
+  .kv th.in1 { padding-left: 16px; } .kv th.in2 { padding-left: 32px; }
+  a { color: var(--accent); }
 </style></head>
 <body><main>
   <h1>${esc(pack.name)}</h1>
@@ -172,11 +201,12 @@ export function buildSetupSheet(project, manifest) {
     <b>How to use this sheet</b>
     <ol>
       <li>Open the <b>inZOI ModKit</b> and create a new mod project.</li>
-      <li>Import the FBX files from the <code>Animations</code> folder next to this sheet. Pick the Zoi skeleton when asked (never create a new skeleton).</li>
-      <li>For each animation below, follow the steps and copy the values exactly.</li>
+      <li>Import the FBX files from the <code>Animations</code> folder next to this sheet onto the <b>inZOI template skeleton</b> (<code>SK_Base</code>: set Skeleton in the import options; never create a new skeleton).</li>
+      <li>For each animation below, follow the steps and copy the values exactly. Entry names must match exactly: the Zoi Animation Framework finds animations by them.</li>
       <li>Keep <code>zaf_pack.json</code> with your mod: it describes scenes, stages and actor placement for the Zoi Animation Framework runtime.</li>
       <li>Export the mod (Local or CurseForge) from the ModKit.</li>
     </ol>
+    Field names follow the official ModKit docs: <a href="https://mod-docs.playinzoi.com/docs/category/characteranimation">mod-docs.playinzoi.com → Animation → CharacterAnimation</a>.
   </div>
   ${sections}
 </main></body></html>`;
