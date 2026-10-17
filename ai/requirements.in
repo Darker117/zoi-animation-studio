@@ -1,0 +1,10 @@
+# What MSFlow's generation code imports (training, evaluation and plotting packages are left out).
+# torch itself comes from the PyTorch index (GPU or CPU build) in setup_ai.ps1.
+torch==2.7.1
+numpy==1.26.4
+einops==0.8.1
+transformers>=4.46,<5
+torchdiffeq==0.2.5
+tqdm
+pyyaml
+safetensors

@@ -18,10 +18,11 @@ The framework has two halves:
 
 ## Install
 
-Run **`Studio-Setup-1.0.0.exe`** and follow the setup wizard. It installs for your Windows account only (no administrator prompt), adds **Studio** to the Start menu (and the desktop if you tick it), and can optionally install the in-game framework mod when inZOI is found.
+Run **`Studio-Setup-1.1.0.exe`** and follow the setup wizard. It installs for your Windows account only (no administrator prompt), adds **Studio** to the Start menu (and the desktop if you tick it), and can optionally install the in-game framework mod when inZOI is found.
 
 * Needs Windows 10 or 11 (64-bit) and the Microsoft Edge WebView2 Runtime, which is built into Windows 11. Setup tells you if it's missing.
 * Windows may show "Windows protected your PC" the first time, because the installer isn't code-signed yet: choose **More info → Run anyway**.
+* **The AI for Describe a motion** is downloaded during setup (the "Download the AI" box, ticked by default). Setup installs a private copy of Python and PyTorch (the NVIDIA GPU build when your PC has a supported card) and the MSFlow model, all inside Studio's own folder: about 4 GB to download (6.5 GB on disk) with an NVIDIA card, about 1 GB without. On an RTX 4080 a 5-second motion takes about 2 seconds; without an NVIDIA card it runs on the processor and takes longer. It needs the internet once and runs offline afterwards. If you untick it or the download fails, open **Describe a motion** in Studio and click **Download AI model** later. Uninstalling removes it.
 * Your work is kept when you uninstall: projects and exports in `Documents\Zoi Motion Studio`, autosave, preferences and saved poses in `%LOCALAPPDATA%\Zoi Motion Studio`.
 
 To build the installer yourself: install [Inno Setup](https://jrsoftware.org/isinfo.php) 6.7 or newer, then run `powershell -ExecutionPolicy Bypass -File installer\build.ps1`. The result is in `dist\`. The app's icon comes from `studio\assets\logo.png` when that file exists.
@@ -115,6 +116,7 @@ For a bone-for-bone match with in-game Zois, export the Zoi skeleton from the Mo
 ```
 Start Studio.bat               launcher for running from this folder (no install)
 installer/                     Windows app (native window, installer/launcher) and installer (Inno Setup)
+ai/                            Describe a motion: AI server (MSFlow), setup script, pinned model list
 studio/                        the studio (HTML/JS, three.js vendored in studio/vendor)
 bridge/server.ps1              local helper: serves the studio, live link, saving, inZOI detection
 runtime/ZoiAnimFramework/      the in-game mod (Lua director + Animations panel)
@@ -149,6 +151,7 @@ Your projects and exports go to `Documents\Zoi Motion Studio\`.
 * [three.js](https://threejs.org) r160 (MIT), vendored in `studio/vendor/three`.
 * Posing figures: bodies from Blender Studio's [Human Base Meshes](https://www.blender.org/download/demo-files/#assets) v1.4.1 (CC0), rigged to the Zoi skeleton by `tools/figures/`.
 * The inZOI body-tracking model is loaded from **your own** game folder at runtime and never copied or redistributed.
+* Describe a motion: [MSFlow](https://github.com/yu1ut/MSFlow) (MotionSpaceFlow) by Qing Yu and Kent Fujiwara, LY Corporation. Generation code CC0 1.0 (copied in `ai/msflow`), model weights Apache-2.0, downloaded from Hugging Face with the [DistilBERT](https://huggingface.co/distilbert/distilbert-base-uncased) text encoder (Apache-2.0), PyTorch (BSD) and [uv](https://github.com/astral-sh/uv) (MIT/Apache-2.0).
 * Windows app window: Microsoft Edge WebView2 SDK (BSD licence, shipped in the app's `licenses` folder). Installer built with Inno Setup.
 * The installer banner uses inZOI key art and the inZOI logo, which belong to KRAFTON, Inc.; check KRAFTON's fan-content rules before distributing builds publicly.
 * inZOI is a trademark of KRAFTON, Inc.

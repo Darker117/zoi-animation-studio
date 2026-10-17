@@ -125,6 +125,24 @@ Copy-Item (Join-Path $Here 'launcher\app.config') (Join-Path $Build 'Studio.exe.
 Copy-Item (Join-Path $lib '*') $Build -Force
 Write-Host "App: $exe"
 
+# ------------------------------------------------------------------ uv (installs the AI's Python and packages)
+
+# Official release, checked against its published SHA-256.
+$UvVersion = '0.12.17'
+$uvDir = Join-Path $Build 'uv'
+if (-not (Test-Path (Join-Path $uvDir 'uv.exe'))) {
+  New-Item -ItemType Directory -Force -Path $uvDir | Out-Null
+  $base = "https://github.com/astral-sh/uv/releases/download/$UvVersion/uv-x86_64-pc-windows-msvc.zip"
+  $zip = Join-Path $uvDir 'uv.zip'
+  & curl.exe -sSfL -o $zip $base
+  $want = ((& curl.exe -sSfL "$base.sha256") -split '\s+')[0]
+  if ((Get-FileHash -Algorithm SHA256 $zip).Hash -ne $want.ToUpper()) { throw 'The uv download did not match its checksum' }
+  Expand-Archive $zip $uvDir -Force
+  Remove-Item $zip
+  & curl.exe -sSfL -o (Join-Path $uvDir 'uv-LICENSE-MIT.txt') "https://raw.githubusercontent.com/astral-sh/uv/$UvVersion/LICENSE-MIT"
+}
+Write-Host "uv: $UvVersion"
+
 # ------------------------------------------------------------------ installer
 
 if (-not $Iscc) {

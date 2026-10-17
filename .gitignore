@@ -2,6 +2,11 @@
 dist/
 installer/build/
 
+# AI runtime and model files (downloaded by ai/setup_ai.ps1; uv.exe is fetched by installer/build.ps1)
+ai/runtime/
+ai/models/
+ai/bin/
+
 # Python / Blender
 __pycache__/
 *.pyc

@@ -1,0 +1,53 @@
+{
+  "note": "Files downloaded by setup_ai.ps1 into ai/models/. Pinned to exact Hugging Face commits and checked by SHA-256.",
+  "files": [
+    {
+      "path": "MMDiT_xyz_pretrained/model/latest.tar",
+      "url": "https://huggingface.co/ly-corporation/MSFlow/resolve/e272ad6d023a18af53d248ffdd7b36560d1cea4a/checkpoints/t2m/MMDiT_xyz_pretrained/model/latest.tar",
+      "size": 548761266,
+      "sha256": "5e6da1dfc23cf20e45a40bc9a5f150caa0c88fa53052de62926b460c786f946c"
+    },
+    {
+      "path": "MMDiT_xyz_pretrained/config.yaml",
+      "url": "https://huggingface.co/ly-corporation/MSFlow/resolve/e272ad6d023a18af53d248ffdd7b36560d1cea4a/checkpoints/t2m/MMDiT_xyz_pretrained/config.yaml",
+      "size": 951,
+      "sha256": "18bd99f504ae86c68f2b3dc90d59054a5d726f51c3e09229a2832f9a09e60074"
+    },
+    {
+      "path": "MMDiT_xyz_pretrained/LICENSE",
+      "url": "https://huggingface.co/ly-corporation/MSFlow/resolve/e272ad6d023a18af53d248ffdd7b36560d1cea4a/LICENSE",
+      "size": 11356,
+      "sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1"
+    },
+    {
+      "path": "distilbert-base-uncased/model.safetensors",
+      "url": "https://huggingface.co/distilbert/distilbert-base-uncased/resolve/12040accade4e8a0f71eabdb258fecc2e7e948be/model.safetensors",
+      "size": 267954768,
+      "sha256": "5e3f1108e3cb34ee048634875d8482665b65ac713291a7e32396fb18f6ff0063"
+    },
+    {
+      "path": "distilbert-base-uncased/config.json",
+      "url": "https://huggingface.co/distilbert/distilbert-base-uncased/resolve/12040accade4e8a0f71eabdb258fecc2e7e948be/config.json",
+      "size": 483,
+      "sha256": "69c94b0222d5d1f4b0ad027ca7416cdafb98378cbbb8305d0bf47c9365c60c83"
+    },
+    {
+      "path": "distilbert-base-uncased/tokenizer.json",
+      "url": "https://huggingface.co/distilbert/distilbert-base-uncased/resolve/12040accade4e8a0f71eabdb258fecc2e7e948be/tokenizer.json",
+      "size": 466062,
+      "sha256": "ce64fce797c24f68df90b40a3f74f579b336a493db14bd583fd520ea0d8c9a98"
+    },
+    {
+      "path": "distilbert-base-uncased/tokenizer_config.json",
+      "url": "https://huggingface.co/distilbert/distilbert-base-uncased/resolve/12040accade4e8a0f71eabdb258fecc2e7e948be/tokenizer_config.json",
+      "size": 48,
+      "sha256": "a025160ef0431f1a392f6f050c1310f4c5d9fb6f275932dbccba73c4d214bf10"
+    },
+    {
+      "path": "distilbert-base-uncased/vocab.txt",
+      "url": "https://huggingface.co/distilbert/distilbert-base-uncased/resolve/12040accade4e8a0f71eabdb258fecc2e7e948be/vocab.txt",
+      "size": 231508,
+      "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+    }
+  ]
+}

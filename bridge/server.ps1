@@ -10,11 +10,11 @@
 param(
   [int]$Port = 47820,
   [switch]$NoBrowser,
-  [int]$AiPort = 47821
+  [int]$AiPort = 0   # text-to-motion AI server; 0 = this helper's port + 100
 )
 
 $ErrorActionPreference = 'Stop'
-$Version = '1.0.0'
+$Version = '1.1.0'
 $StudioRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\studio')).Path
 $DataDir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Zoi Motion Studio'
 New-Item -ItemType Directory -Force -Path $DataDir | Out-Null
@@ -123,6 +123,21 @@ function Install-Runtime {
   Write-PackIndex
 }
 
+# Permanent mods through the inZOI ModKit (tools\modkit\build_mod.ps1). A build takes a few minutes, so it
+# runs as its own hidden process and reports progress in <folder>\modkit_build\status.json.
+# Builds without tools\modkit (e.g. an install that does not ship it) answer 503 instead of failing at startup.
+$ModKitBuilder = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\tools\modkit\build_mod.ps1'))
+$ModKitBuild = $null
+
+function Get-ModKitStatusPath([string]$dir) { return Join-Path $dir 'modkit_build\status.json' }
+
+function Start-ModKitBuild([string]$dir, [string]$extra) {
+  $status = Get-ModKitStatusPath $dir
+  if (Test-Path $status) { Remove-Item $status -Force }
+  $argList = "-NoProfile -ExecutionPolicy Bypass -File `"$ModKitBuilder`" -StatusFile `"$status`" $extra"
+  $script:ModKitBuild = Start-Process powershell.exe -ArgumentList $argList -WindowStyle Hidden -PassThru
+}
+
 function Resolve-DataPath([string]$rel) {
   if (-not $rel) { return $DataDir }
   $rel = $rel -replace '/', '\'
@@ -150,8 +165,51 @@ function Handle-Vmc($ctx) {
   Send-Json $ctx @{ ok = $true; packets = $n }
 }
 
+# ------------------------------------------------------------------ text-to-motion AI (ai\server.py)
+# ai\setup_ai.ps1 installs it (the installer runs it; the studio can run it again). The helper starts
+# the AI server the first time the studio asks for it; the server stops by itself when the helper exits.
+$AiDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\ai'))
+$AiServer = $null
+$AiSetup = $null
+
+function Test-AiInstalled {
+  return (Test-Path (Join-Path $AiDir 'runtime\ready.json')) -and (Test-Path (Join-Path $AiDir 'runtime\venv\Scripts\pythonw.exe'))
+}
+function Get-AiSetupStatus {
+  $f = Join-Path $AiDir 'runtime\setup_status.json'
+  if (Test-Path $f) { try { return Get-Content $f -Raw | ConvertFrom-Json } catch { } }
+  return $null
+}
+function Test-AiSetupRunning { return [bool]($script:AiSetup -and -not $script:AiSetup.HasExited) }
+function Start-AiServer {
+  if ($script:AiServer -and -not $script:AiServer.HasExited) { return }
+  $py = Join-Path $AiDir 'runtime\venv\Scripts\pythonw.exe'
+  $script:AiServer = Start-Process $py -ArgumentList "`"$(Join-Path $AiDir 'server.py')`" --port $AiPort --parent $PID" -WorkingDirectory $AiDir -WindowStyle Hidden -PassThru
+}
+function Start-AiSetup {
+  if (Test-AiSetupRunning) { return }
+  $script:AiSetup = Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $AiDir 'setup_ai.ps1')`"" -WindowStyle Hidden -PassThru
+}
+# What the studio sees while the AI server is not answering: installing, starting, or not installed.
+function Send-AiOffline($ctx, [bool]$isGenerate) {
+  if (-not (Test-Path (Join-Path $AiDir 'setup_ai.ps1'))) {
+    Send-Json $ctx @{ ok = $true; ready = $false; state = 'unavailable'; installed = $false; message = 'This copy of Studio does not include the AI.' } $(if ($isGenerate) { 503 } else { 200 }); return
+  }
+  $setup = Get-AiSetupStatus
+  if ((Test-AiSetupRunning) -or ($setup -and $setup.state -eq 'running' -and -not (Test-AiInstalled))) {
+    Send-Json $ctx @{ ok = $true; ready = $false; state = 'installing'; installed = $false; percent = $(if ($setup) { $setup.percent } else { 0 }); message = $(if ($setup) { $setup.message } else { 'Setting up the AI' }) } $(if ($isGenerate) { 503 } else { 200 }); return
+  }
+  if (Test-AiInstalled) {
+    Start-AiServer
+    Send-Json $ctx @{ ok = $true; ready = $false; state = 'starting'; installed = $true; message = 'Starting the AI (the first start can take up to a minute)' } $(if ($isGenerate) { 503 } else { 200 }); return
+  }
+  $msg = if ($setup -and $setup.state -eq 'error') { $setup.message } else { 'The AI model is not downloaded yet.' }
+  Send-Json $ctx @{ ok = $true; ready = $false; state = 'missing'; installed = $false; message = $msg } $(if ($isGenerate) { 503 } else { 200 })
+}
+
 function Handle-AiProxy($ctx) {
   $req = $ctx.Request
+  if (-not ($AiServer -and -not $AiServer.HasExited)) { Send-AiOffline $ctx ($req.HttpMethod -eq 'POST'); return }
   try {
     $url = "http://127.0.0.1:$AiPort" + $req.Url.PathAndQuery
     $wr = [System.Net.HttpWebRequest]::Create($url)
@@ -176,7 +234,8 @@ function Handle-AiProxy($ctx) {
       $r.GetResponseStream().CopyTo($ms)
       Send-Bytes $ctx $ms.ToArray() 'application/json' ([int]$r.StatusCode)
     } else {
-      Send-Json $ctx @{ ready = $false; message = 'The AI add-on is not running. Start it with "ai\Start AI add-on.bat" (install it once with "ai\Install AI add-on.bat").' }
+      # Started but not listening yet (Python is still loading).
+      Send-Json $ctx @{ ok = $true; ready = $false; state = 'starting'; installed = $true; message = 'Starting the AI (the first start can take up to a minute)' } $(if ($req.HttpMethod -eq 'POST') { 503 } else { 200 })
     }
   }
 }
@@ -256,6 +315,41 @@ function Handle($ctx) {
       Send-Json $ctx @{ ok = $true; path = $RuntimeDst; packs = @(Get-InstalledPacks) }
       return
     }
+    '^/api/modkit/(build|skeleton)$' {
+      if ($method -ne 'POST') { Send-Text $ctx 'POST only' 405; return }
+      if (-not (Test-Path $ModKitBuilder)) { Send-Json $ctx @{ ok = $false; message = 'The ModKit tools are not installed (tools\modkit is missing).' } 503; return }
+      if ($ModKitBuild -and -not $ModKitBuild.HasExited) { Send-Json $ctx @{ ok = $false; message = 'A ModKit build is already running.' } 409; return }
+      if ($Matches[1] -eq 'build') {
+        $dir = Resolve-DataPath $req.QueryString['path']
+        if (-not (Test-Path (Join-Path $dir 'zaf_pack.json'))) { Send-Text $ctx 'No zaf_pack.json in that folder' 400; return }
+        Start-ModKitBuild $dir "-Pack `"$dir`""
+      } else {
+        $dir = Join-Path $DataDir 'Characters'
+        Start-ModKitBuild $dir ("-ExportZoiSkeleton -SkeletonOut `"" + (Join-Path $dir 'Zoi body (inZOI ModKit).fbx') + "`"")
+      }
+      Send-Json $ctx @{ ok = $true }
+      return
+    }
+    '^/api/modkit/status$' {
+      $rel = if ($req.QueryString['path']) { $req.QueryString['path'] } else { 'Characters' }
+      $status = Get-ModKitStatusPath (Resolve-DataPath $rel)
+      $running = [bool]($ModKitBuild -and -not $ModKitBuild.HasExited)
+      if (Test-Path $status) {
+        $s = [IO.File]::ReadAllText($status) | ConvertFrom-Json
+        if ($s.state -eq 'running' -and -not $running) { $s.state = 'error'; $s.message = 'The ModKit build stopped unexpectedly. The logs are in the modkit_build folder.' }
+        Send-Json $ctx $s
+      } else {
+        Send-Json $ctx @{ state = $(if ($running) { 'running' } else { 'idle' }) }
+      }
+      return
+    }
+    '^/api/ai/setup$' {
+      if ($method -ne 'POST') { Send-Text $ctx 'POST only' 405; return }
+      if (-not (Test-Path (Join-Path $AiDir 'setup_ai.ps1'))) { Send-Json $ctx @{ ok = $false; message = 'This copy of Studio does not include the AI.' } 404; return }
+      if (-not (Test-AiInstalled)) { Start-AiSetup }
+      Send-Json $ctx @{ ok = $true; installed = (Test-AiInstalled) }
+      return
+    }
     '^/api/ai/' { Handle-AiProxy $ctx; return }
     '^/api/' { Send-Text $ctx 'Unknown endpoint' 404; return }
     default { Handle-Static $ctx }
@@ -273,6 +367,7 @@ for ($try = 0; $try -lt 10; $try++) {
 if (-not $listener) { Write-Host 'Could not open a local port for the studio.' -ForegroundColor Red; Read-Host 'Press Enter to close'; exit 1 }
 
 $url = "http://localhost:$Port/"
+if ($AiPort -le 0) { $AiPort = $Port + 100 }
 Write-Host ''
 Write-Host '  Studio' -ForegroundColor Magenta
 Write-Host "  Running at $url" -ForegroundColor Cyan

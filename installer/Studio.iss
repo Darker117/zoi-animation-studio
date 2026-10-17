@@ -3,7 +3,7 @@
 ; passes them in as defines.
 
 #ifndef AppVersion
-  #define AppVersion "1.0.0"
+  #define AppVersion "1.1.0"
 #endif
 #ifndef BannerImages
   #define BannerImages "art\banner-source.jpg"
@@ -28,6 +28,10 @@ VersionInfoVersion={#AppVersion}
 VersionInfoDescription={#AppName} Setup
 ; Per-user install: no administrator prompt, lands in %LOCALAPPDATA%\Programs.
 PrivilegesRequired=lowest
+; Setup runs ai\setup_ai.ps1, and uv links each Python version folder with a directory junction.
+; RedirectionGuard (inherited by child processes) blocks those junctions; it protects elevated
+; installs from path-redirection attacks, which do not apply to this per-user, non-admin install.
+RedirectionGuard=no
 ; The install folder keeps its original name, so upgrades land in the same place.
 DefaultDirName={autopf}\Zoi Motion Studio
 DefaultGroupName={#AppName}
@@ -68,6 +72,7 @@ ClickFinish=
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Shortcuts:"
 Name: "gamemod"; Description: "Install the Zoi Animation Framework mod into inZOI (experimental: not yet tested in the game)"; GroupDescription: "inZOI:"; Flags: unchecked; Check: InzoiFound
+Name: "aimodel"; Description: "Download the AI for Describe a motion (about 4 GB download and 6.5 GB on disk with an NVIDIA graphics card, about 1 GB without; needs the internet once)"; GroupDescription: "AI:"
 
 [Files]
 Source: "build\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
@@ -91,6 +96,15 @@ Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\runtime\ZoiAnimFramework\*"; DestDir: "{userdocs}\inZOI\Mods\InGame\ZoiAnimFramework"; Excludes: "ui\zaf\packs\*"; Flags: ignoreversion recursesubdirs createallsubdirs; Tasks: gamemod
 Source: "..\runtime\ZoiAnimFramework\ui\zaf\packs\*"; DestDir: "{userdocs}\inZOI\Mods\InGame\ZoiAnimFramework\ui\zaf\packs"; Flags: onlyifdoesntexist uninsneveruninstall; Tasks: gamemod
 
+; Text-to-motion AI (MSFlow). Python, PyTorch and the model files are downloaded by ai\setup_ai.ps1.
+Source: "..\ai\server.py"; DestDir: "{app}\ai"; Flags: ignoreversion
+Source: "..\ai\setup_ai.ps1"; DestDir: "{app}\ai"; Flags: ignoreversion
+Source: "..\ai\models.json"; DestDir: "{app}\ai"; Flags: ignoreversion
+Source: "..\ai\requirements.txt"; DestDir: "{app}\ai"; Flags: ignoreversion
+Source: "..\ai\msflow\*"; DestDir: "{app}\ai\msflow"; Excludes: "*.pyc,__pycache__"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "build\uv\uv.exe"; DestDir: "{app}\ai\bin"; Flags: ignoreversion
+Source: "build\uv\uv-LICENSE-MIT.txt"; DestDir: "{app}\licenses"; Flags: ignoreversion
+
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"; Comment: "Make animations for your Zois"; AppUserModelID: "ZoiAnimationFramework.ZoiMotionStudio"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Comment: "Make animations for your Zois"; AppUserModelID: "ZoiAnimationFramework.ZoiMotionStudio"; Tasks: desktopicon
@@ -105,7 +119,16 @@ Type: files; Name: "{app}\ZoiMotionStudio.exe.config"
 Type: files; Name: "{autoprograms}\Zoi Motion Studio.lnk"
 Type: files; Name: "{autodesktop}\Zoi Motion Studio.lnk"
 
+[UninstallRun]
+; Stop the AI server if it is still running, so its files can be removed.
+Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""Get-CimInstance Win32_Process | Where-Object {{ $_.ExecutablePath -like '{app}\ai\runtime\*' } | ForEach-Object {{ Stop-Process -Id $_.ProcessId -Force }"""; Flags: runhidden; RunOnceId: "StopStudioAI"
+; Remove the AI folder with long-path syntax first: PyTorch's files can sit deeper than the
+; 260-character limit the uninstaller's own file removal is subject to.
+Filename: "{cmd}"; Parameters: "/c rmdir /s /q ""\\?\{app}\ai"""; Flags: runhidden; RunOnceId: "RemoveStudioAI"
+
 [UninstallDelete]
+; The AI's downloaded Python, packages and model files (several GB).
+Type: filesandordirs; Name: "{app}\ai"
 ; Only the app's log and window placement. Saved work (the studio profile in
 ; %LOCALAPPDATA%\Zoi Motion Studio\WebView2, and Documents\Zoi Motion Studio) stays.
 Type: files; Name: "{localappdata}\Zoi Motion Studio\launcher.log"
@@ -129,6 +152,65 @@ begin
     Result := MsgBox('Studio needs the Microsoft Edge WebView2 Runtime. It is part of Windows 11 but is missing on this PC.' + #13#10#13#10 +
                      'You can install now and get the runtime from Microsoft afterwards (the app shows the link). Continue?',
                      mbConfirmation, MB_YESNO) = IDYES;
+end;
+
+{ ------------------------------------------------------------------ AI download during setup }
+var
+  AiError: String;
+
+{ setup_ai.ps1 prints "@@ <percent> <message>" lines; show them in Setup's progress bar. }
+procedure AiSetupLog(const S: String; const Error, FirstLine: Boolean);
+var
+  Rest: String;
+  P, Pct: Integer;
+begin
+  if Copy(S, 1, 8) = '@@ERROR ' then
+  begin
+    AiError := Copy(S, 9, MaxInt);
+    Exit;
+  end;
+  if Copy(S, 1, 3) <> '@@ ' then Exit;
+  Rest := Copy(S, 4, MaxInt);
+  P := Pos(' ', Rest);
+  if P = 0 then Exit;
+  Pct := StrToIntDef(Copy(Rest, 1, P - 1), -1);
+  if Pct >= 0 then WizardForm.ProgressGauge.Position := Pct;
+  WizardForm.FilenameLabel.Caption := Copy(Rest, P + 1, MaxInt);
+end;
+
+procedure RunAiSetup;
+var
+  Code: Integer;
+  Ok: Boolean;
+begin
+  WizardForm.StatusLabel.Caption := 'Setting up the AI for Describe a motion. The download can take a while...';
+  WizardForm.FilenameLabel.Caption := '';
+  WizardForm.ProgressGauge.Style := npbstNormal;
+  WizardForm.ProgressGauge.Min := 0;
+  WizardForm.ProgressGauge.Max := 100;
+  WizardForm.ProgressGauge.Position := 0;
+  AiError := '';
+  Ok := False;
+  try
+    Ok := ExecAndLogOutput(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
+      '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}\ai\setup_ai.ps1') + '"',
+      ExpandConstant('{app}\ai'), SW_HIDE, ewWaitUntilTerminated, Code, @AiSetupLog) and (Code = 0);
+  except
+    AiError := GetExceptionMessage;
+  end;
+  if not Ok then
+  begin
+    if AiError = '' then AiError := 'The setup stopped unexpectedly (code ' + IntToStr(Code) + ').';
+    Log('AI setup failed: ' + AiError);
+    if not WizardSilent then
+      MsgBox('Studio is installed, but the AI could not be set up:' + #13#10#13#10 + AiError + #13#10#13#10 +
+        'Studio works without it. To try again, open Describe a motion in Studio and choose Download AI model.', mbInformation, MB_OK);
+  end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if (CurStep = ssPostInstall) and WizardIsTaskSelected('aimodel') then RunAiSetup;
 end;
 
 function InzoiFound: Boolean;

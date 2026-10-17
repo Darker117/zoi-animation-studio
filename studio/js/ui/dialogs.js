@@ -472,31 +472,76 @@ export function inzoiGuide() {
 // ------------------------------------------------------------------ AI text to motion
 
 export async function textToMotion(app) {
-  let status = null;
-  try { const r = await fetch('/api/ai/status', { cache: 'no-store' }); if (r.ok) status = await r.json(); } catch { /* not running */ }
+  const ai = await import('../ai/text2motion.js');
   const prompt = h('textarea', { rows: 3, placeholder: 'a person waves both hands excitedly, then jumps' }, prefGet('ai.prompt', ''));
-  const secs = h('input.inline-num', { type: 'number', min: 1, max: 9.8, step: 0.5, value: prefGet('ai.secs', 4) });
+  const secs = h('input.inline-num', { type: 'number', min: 2, max: 9.8, step: 0.5, value: prefGet('ai.secs', 4) });
   const bar = h('div.progress', {}, h('div'));
-  const ready = status?.ready;
+  const barLabel = h('div.muted.small', { style: { marginTop: '6px', minHeight: '16px' } });
+  const card = h('div.card', { style: { marginBottom: '12px' } });
+  let status = await ai.aiStatus();
+  let polling = null;
+  let busy = false;
+
+  const setBar = (fraction, label = '') => { bar.firstChild.style.width = Math.round(fraction * 100) + '%'; barLabel.textContent = label; };
+  // The card above the prompt explains what the AI is doing when it is not ready yet.
+  const renderCard = () => {
+    card.innerHTML = '';
+    card.style.display = status.ready ? 'none' : '';
+    if (status.ready) return;
+    const title = { loading: 'Starting the AI', starting: 'Starting the AI', installing: 'Downloading the AI model',
+      missing: 'The AI model is not downloaded yet', unavailable: 'AI not included', error: 'The AI could not start', offline: 'Studio\'s helper is not running' }[status.state] || 'AI not ready';
+    card.append(h('b', {}, title), h('p.hint-text', { style: { margin: '4px 0 0' } }, status.message || ''));
+    if (status.state === 'installing') {
+      const p = h('div.progress', { style: { marginTop: '10px' } }, h('div'));
+      p.firstChild.style.width = (status.percent || 0) + '%';
+      card.append(p);
+    }
+    if (status.state === 'missing') {
+      card.append(h('p.hint-text', {}, 'Studio downloads Python, PyTorch and the MSFlow model once (about 4 GB with an NVIDIA graphics card, about 1 GB without) and keeps them on this PC. Everything runs offline afterwards.'),
+        h('button.btn.primary.small', { style: { marginTop: '8px' }, onclick: async () => {
+          try { await ai.startAiSetup(); toast('Downloading the AI model. You can keep working while it downloads.', { type: 'ok' }); poll(); }
+          catch (e) { toast(e.message, { type: 'err', timeout: 8000 }); }
+        } }, 'Download AI model'));
+    }
+  };
+  const poll = () => {
+    if (polling) return;
+    polling = setInterval(async () => {
+      if (!card.isConnected) { clearInterval(polling); return; }
+      status = await ai.aiStatus();
+      if (!busy) renderCard();
+      // Once the download finishes, wake the AI so it is ready when you press Generate.
+      if (['ready', 'missing', 'unavailable', 'error', 'offline'].includes(status.state)) { if (status.state !== 'missing') { clearInterval(polling); polling = null; } }
+    }, 1500);
+  };
+  renderCard();
+  if (!status.ready && ['loading', 'starting', 'installing'].includes(status.state)) poll();
+
   modal({
     title: 'Describe a motion',
     content: h('div', {},
-      ready ? null : h('div.card', { style: { borderColor: 'rgba(255,181,71,.5)', marginBottom: '12px' } },
-        h('b', {}, 'AI add-on not running'),
-        h('p.hint-text', { style: { margin: '4px 0 0' } }, status ? status.message : 'Text-to-motion uses the open MSFlow model on your graphics card. Run "ai\\Install AI add-on.bat" once, then start the studio again.')),
+      card,
       h('div.row', {}, h('label', {}, 'Motion'), prompt),
-      h('div.row', {}, h('label', {}, 'Length'), secs, h('span.muted', {}, 'seconds')),
-      h('p.hint-text', {}, 'Describe the body movement in plain English. Results land as a new editable animation. Fingers and face are not generated.'),
-      bar),
+      h('div.row', {}, h('label', {}, 'Length'), secs, h('span.muted', {}, 'seconds (2 to 9.8)')),
+      h('p.hint-text', {}, 'Describe the body movement in plain English, for example "a person jumps forward and lands softly". The result arrives as a new animation you can edit like any other. Fingers and face are not generated.'),
+      bar, barLabel),
+    footLeft: h('span.muted.small', {}, 'MSFlow by LY Corporation'),
     buttons: [{ label: 'Close' }, { label: 'Generate', primary: true, onClick: async () => {
-      if (!ready) { toast('Start the AI add-on first.', { type: 'warn' }); return false; }
+      if (busy) return false;
+      const text = prompt.value.trim();
+      if (!text) { toast('Describe the motion first.'); return false; }
+      if (['missing', 'unavailable', 'offline'].includes(status.state)) { toast(status.message, { type: 'warn', timeout: 6000 }); return false; }
       prefSet('ai.prompt', prompt.value); prefSet('ai.secs', +secs.value);
-      bar.firstChild.style.width = '15%';
+      busy = true;
       try {
-        const { generateFromText } = await import('../ai/text2motion.js');
-        await generateFromText(app, prompt.value.trim(), +secs.value, (p) => { bar.firstChild.style.width = Math.round(p * 100) + '%'; });
+        await ai.generateFromText(app, text, Math.min(9.8, Math.max(2, +secs.value || 4)), setBar);
+        toast(`Added "${app.scene.name}". Press Space to play it.`, { type: 'ok', timeout: 5000 });
         return true;
-      } catch (e) { toast(e.message, { type: 'err', timeout: 8000 }); bar.firstChild.style.width = '0'; return false; }
+      } catch (e) {
+        toast(e.message, { type: 'err', timeout: 8000 });
+        setBar(0);
+        return false;
+      } finally { busy = false; }
     } }],
   });
 }
